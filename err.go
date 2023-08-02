@@ -3,22 +3,20 @@ package ginz
 import "fmt"
 
 type Errors struct {
-	err  error  `json:"-"`
-	Code int    `json:"Code,omitempty"`
-	Msg  string `json:"Msg,omitempty"`
+	Code int
+	Msg  string
 }
 
 func (err *Errors) String() string {
-	return fmt.Sprintf("Code: %v, Message: %v,error:%v", err.Code, err.Msg, err.err)
-}
-
-func (err *Errors) Err() string {
-	return err.Msg
+	return fmt.Sprintf("Code: %v, Message: %v", err.Code, err.Msg)
 }
 
 func (err *Errors) AddMsg(msg string) *Errors {
-	err.Msg += " " + msg
-	return err
+	return &Errors{Code: err.Code, Msg: err.Msg + "" + msg}
+}
+
+func (err *Errors) Args(args ...any) *Errors {
+	return &Errors{Code: err.Code, Msg: fmt.Sprintf(err.Msg, args...)}
 }
 
 // common

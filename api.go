@@ -8,10 +8,11 @@ import (
 type ApiHandler func(c *gin.Context) (data any, err *Errors)
 
 type Api struct {
-	Name    string
-	Info    string
-	Method  string
-	Handler ApiHandler
+	Name      string
+	Info      string
+	Method    string
+	Handler   ApiHandler
+	WithCache bool
 }
 
 type ApiGroup struct {
