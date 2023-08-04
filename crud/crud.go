@@ -1,7 +1,6 @@
 package crud
 
 import (
-	"github.com/qf0129/goo"
 	"gorm.io/gorm"
 )
 
@@ -34,7 +33,7 @@ type PageBody[T any] struct {
 	Total    int64
 }
 
-var DB *gorm.DB = goo.DB
+var DB *gorm.DB
 
 func Init(db *gorm.DB) {
 	DB = db

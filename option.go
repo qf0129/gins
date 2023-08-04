@@ -1,8 +1,11 @@
 package ginz
 
 import (
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/logger"
 )
+
+type Middleware func(*gin.Context)
 
 type Option struct {
 	LoadConfigFile     bool
@@ -12,6 +15,7 @@ type Option struct {
 	DefaultGroupPrefix string
 	PrimaryKey         string
 	DefaultPageSize    int
+	Middlewares        []Middleware
 }
 
 func (option *Option) Load() {

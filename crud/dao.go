@@ -11,12 +11,14 @@ import (
  * @param ${params}
  * @return ${return_types}
  */
-func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]string) (result PageBody[T]) {
+func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]any) (result PageBody[T], err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
 	}
-	query.Count(&result.Total)
+	if query.Count(&result.Total).Error != nil {
+		return
+	}
 
 	if fixedOption == nil {
 		fixedOption = &FixedOption{
@@ -37,11 +39,11 @@ func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]string)
 	result.Page = fixedOption.Page
 	result.PageSize = fixedOption.PageSize
 	query = FiltePageFunc(result.Page, result.PageSize)(query)
-	query.Find(&result.List)
+	err = query.Find(&result.List).Error
 	return
 }
 
-func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]string) (result []T) {
+func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]any) (result []T, err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
@@ -51,40 +53,40 @@ func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]string) 
 			query = FiltePreloadFunc(field)(query)
 		}
 	}
-	query.Find(&result)
+	err = query.Find(&result).Error
 	return
 }
 
-func ExistByPk[T GormModel](pk any) (result bool) {
+func ExistByPk[T GormModel](pk any) (result bool, err error) {
 	item := new(T)
-	err := DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).First(&item).Error
-	return err == nil
+	err = DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).First(&item).Error
+	return err == nil, err
 }
 
-func QueryOneByPk[T GormModel](pk any) (result T) {
-	DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).Take(&result)
+func QueryOneByPk[T GormModel](pk any) (result T, err error) {
+	err = DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).First(&result).Error
 	return
 }
 
-func QueryOneByPkWithPreload[T GormModel](pk any, preload string) (result T) {
+func QueryOneByPkWithPreload[T GormModel](pk any, preload string) (result T, err error) {
 	query := DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk)
 	for _, field := range strings.Split(preload, ",") {
 		query = FiltePreloadFunc(field)(query)
 	}
-	query.Take(&result)
+	err = query.Take(&result).Error
 	return
 }
 
-func QueryOneByMap[T GormModel](filters map[string]string) (result T) {
+func QueryOneByMap[T GormModel](filters map[string]any) (result T, err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
 	}
-	query.Take(&result)
+	err = query.First(&result).Error
 	return
 }
 
-func QueryOneByMapWithPreload[T GormModel](filters map[string]string, preload string) (result T) {
+func QueryOneByMapWithPreload[T GormModel](filters map[string]any, preload string) (result T, err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
@@ -94,7 +96,7 @@ func QueryOneByMapWithPreload[T GormModel](filters map[string]string, preload st
 		query = FiltePreloadFunc(field)(query)
 	}
 
-	query.Take(&result)
+	err = query.First(&result).Error
 	return
 }
 

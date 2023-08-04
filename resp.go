@@ -30,7 +30,7 @@ func RespOk(c *gin.Context, data any) {
 	c.Abort()
 }
 
-func RespErr(c *gin.Context, err *Errors) {
+func RespErr(c *gin.Context, err *Err) {
 	c.JSON(http.StatusOK, RespBody{
 		ReqId: c.GetString(REQUEST_KEY_ID),
 		Code:  err.Code,

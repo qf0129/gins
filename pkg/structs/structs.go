@@ -41,7 +41,7 @@ func GetJsonFields(obj any) []string {
 	}
 
 	var result []string
-	for k, _ := range objMap {
+	for k := range objMap {
 		result = append(result, k)
 	}
 	return result

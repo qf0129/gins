@@ -24,13 +24,13 @@ func GetUrlFilters(vals url.Values) map[string]string {
 	return filters
 }
 
-func ParseFilters(filters map[string]string) (funcs []FilteFunc) {
+func ParseFilters(filters map[string]any) (funcs []FilteFunc) {
 	for k, v := range filters {
 		ks := strings.Split(k, ":")
 		if len(ks) == 2 {
-			funcs = append(funcs, FilteKeyFunc(ks[0], ks[1], v))
+			funcs = append(funcs, FilteKeyFunc(ks[0], ks[1], v.(string)))
 		} else {
-			funcs = append(funcs, FilteKeyFunc(k, "eq", v))
+			funcs = append(funcs, FilteKeyFunc(k, "eq", v.(string)))
 		}
 	}
 	return

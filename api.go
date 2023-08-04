@@ -5,7 +5,7 @@ import (
 	"github.com/qf0129/ginz/pkg/strs"
 )
 
-type ApiHandler func(c *gin.Context) (data any, err *Errors)
+type ApiHandler func(c *gin.Context) (data any, err *Err)
 
 type Api struct {
 	Name      string

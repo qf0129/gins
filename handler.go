@@ -6,12 +6,12 @@ import (
 )
 
 func CreateOneHandler[T crud.GormModel](parentIdKeys ...string) ApiHandler {
-	return func(c *gin.Context) (data any, err *Errors) {
+	return func(c *gin.Context) (data any, err *Err) {
 		var er error
 		var model T
 
 		if er = c.ShouldBindJSON(&model); err != nil {
-			err = ErrParams.AddMsg(er.Error())
+			err = ErrInvalidParams.Add(er.Error())
 			return
 		}
 		if len(parentIdKeys) > 0 {
@@ -22,7 +22,7 @@ func CreateOneHandler[T crud.GormModel](parentIdKeys ...string) ApiHandler {
 		}
 
 		if er != nil {
-			err = ErrParams.AddMsg(er.Error())
+			err = ErrInvalidParams.Add(er.Error())
 			return
 		}
 		data = model
