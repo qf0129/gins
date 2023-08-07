@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/qf0129/goo/pkg/arrays"
+	"github.com/qf0129/ginz/pkg/arrays"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"

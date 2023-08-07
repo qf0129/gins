@@ -7,94 +7,85 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/strs"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
-type Ginz struct {
-	Engine *gin.Engine
-	Option *Option
-}
-
-func (ginz *Ginz) AddGroup(basePath string) *ApiGroup {
-	return &ApiGroup{
-		BasePath:    basePath,
-		RouterGroup: ginz.Engine.Group(basePath),
-	}
-}
-
-var App *Ginz
-var DefaultGroup *ApiGroup
-
 // 初始化
-func Init(option *Option) {
-	option.Load()
-	LoadLogger()
+func Init(option *Option) (ginz *Ginz) {
+	ginz = &Ginz{Engine: gin.New(), Option: option}
+	ginz.ApiGroup = ginz.Group(option.DefaultGroupPrefix)
+
+	option.InitValue()
+	LoadLogger("debug")
 	if option.LoadConfigFile {
-		LoadConfigFile()
-		LoadLogger()
+		ginz.LoadConfig()
+		LoadLogger(ginz.Config.LogLevel)
 	}
 
-	App = &Ginz{
-		Engine: gin.New(),
-		Option: option,
-	}
-
-	gin.SetMode(Config.AppMode)
+	gin.SetMode(ginz.Config.AppMode)
 	if option.ConnectDB {
-		App.ConnectDB()
+		ginz.ConnectDB()
+		crud.Init(ginz.DB)
 	}
-	crud.Init(DB)
 
 	if len(option.Middlewares) > 0 {
 		for _, mid := range option.Middlewares {
-			App.Engine.Use(func(ctx *gin.Context) { mid(ctx) })
+			ginz.Engine.Use(func(ctx *gin.Context) { mid(ctx) })
 		}
 	}
-	// App.Engine.Use(gin.Logger(), gin.Recovery())
-	DefaultGroup = App.AddGroup(option.DefaultGroupPrefix)
+	ginz.Engine.Use(func(ctx *gin.Context) {
+		ctx.Set(REQUEST_KEY_ID, strs.UUID())
+		// ctx.Next()
+	})
+	ginz.Engine.Use(gin.Logger(), gin.Recovery())
 
 	if option.AddHealthCheckApi {
-		addHealthCheckApi()
+		ginz.Engine.GET("/health", func(ctx *gin.Context) { RespOk(ctx, "ok") })
 	}
+	return ginz
 }
 
-// 使用中间件
-func Use(middleware ...gin.HandlerFunc) {
-	App.Engine.Use(middleware...)
+type Ginz struct {
+	Engine    *gin.Engine
+	DB        *gorm.DB
+	Option    *Option
+	Config    *Configuration
+	ApiGroup  *ApiGroup
+	ApiGroups []*ApiGroup
 }
 
 // 运行服务
-func Run() {
-	listenAddr := fmt.Sprintf("%s:%d", Config.AppHost, Config.AppPort)
+func (ginz *Ginz) Run() {
+	listenAddr := fmt.Sprintf("%s:%d", ginz.Config.AppHost, ginz.Config.AppPort)
 	svr := &http.Server{
-		Handler:      App.Engine,
+		Handler:      ginz.Engine,
 		Addr:         listenAddr,
-		ReadTimeout:  time.Duration(Config.AppTimeout) * time.Second,
-		WriteTimeout: time.Duration(Config.AppTimeout) * time.Second,
+		ReadTimeout:  time.Duration(ginz.Config.AppTimeout) * time.Second,
+		WriteTimeout: time.Duration(ginz.Config.AppTimeout) * time.Second,
 	}
-	logrus.Info("Run with " + Config.AppMode + " mode ")
+	logrus.Info("Run with " + ginz.Config.AppMode + " mode ")
 	logrus.Info("Server is listening " + listenAddr)
 	svr.ListenAndServe()
 }
 
-// 默认路由组添加接口
-func AddApi(name string, handler ApiHandler) {
-	DefaultGroup.Add(&Api{
-		Name:    name,
-		Method:  http.MethodPost,
-		Handler: handler,
-	})
+// 添加接口组
+func (ginz *Ginz) Group(basePath string) *ApiGroup {
+	group := &ApiGroup{
+		BasePath:    basePath,
+		RouterGroup: ginz.Engine.Group(basePath),
+	}
+	ginz.ApiGroups = append(ginz.ApiGroups, group)
+	return group
 }
 
-// 添加健康检测接口
-func addHealthCheckApi() {
-	DefaultGroup.Add(&Api{
-		Name:   "health",
-		Info:   "HealthCheck",
-		Method: http.MethodGet,
-		Handler: func(c *gin.Context) (data any, err *Err) {
-			data = "ok"
-			return
-		},
-	})
+// 默认接口组-添加中间件
+func (ginz *Ginz) Use(middleware Middleware) {
+	ginz.ApiGroup.Use(middleware)
+}
+
+// 默认接口组-添加接口
+func (ginz *Ginz) AddApi(name string, handler ApiHandler) {
+	ginz.ApiGroup.AddApi(name, handler)
 }

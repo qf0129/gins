@@ -59,17 +59,17 @@ func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]any) (re
 
 func ExistByPk[T GormModel](pk any) (result bool, err error) {
 	item := new(T)
-	err = DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).First(&item).Error
+	err = DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).First(&item).Error
 	return err == nil, err
 }
 
 func QueryOneByPk[T GormModel](pk any) (result T, err error) {
-	err = DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).First(&result).Error
+	err = DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).First(&result).Error
 	return
 }
 
 func QueryOneByPkWithPreload[T GormModel](pk any, preload string) (result T, err error) {
-	query := DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk)
+	query := DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk})
 	for _, field := range strings.Split(preload, ",") {
 		query = FiltePreloadFunc(field)(query)
 	}
@@ -116,11 +116,11 @@ func CreateOneWithParentId[T GormModel](obj any, parentIdKey string, parentIdVal
 }
 
 func UpdateOneByPk[T GormModel](pk any, data any) error {
-	return DB.Model(new(T)).Where("`?`='?'", CrudDefaultPrimaryKey, pk).Updates(data).Error
+	return DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).Updates(data).Error
 }
 
 func DeleteOneByPk[T GormModel](pk any) error {
-	return DB.Where("`?`='?'", CrudDefaultPrimaryKey, pk).Delete(new(T)).Error
+	return DB.Where(map[string]any{CrudDefaultPrimaryKey: pk}).Delete(new(T)).Error
 }
 
 func HasField[T GormModel](field string) bool {

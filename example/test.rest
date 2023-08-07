@@ -6,14 +6,25 @@
 
 
 ###
-get {{HOST}}/api/health
+get {{HOST}}/health
 
 ###
-post {{HOST}}/api/add
+post {{HOST}}/api/test
+Cookie: tk=d9ad085c281b8781cdc1bf89a5fdc0df26c488d7bf830ea81dbbf0c7e5be35b6
+
+###
+post {{HOST}}/api/register
 
 {
-    "Name": "zs"
+    "username": "qf2",
+    "password": "qf"
 }
 
+
 ###
-post {{HOST}}/api/get
+post {{HOST}}/api/login
+
+{
+    "username": "qf",
+    "password": "qf"
+}

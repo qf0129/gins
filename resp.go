@@ -13,6 +13,8 @@ import (
 // 	Total    int64 `json:"total"`
 // }
 
+const REQUEST_KEY_ID = "ReqId"
+
 type RespBody struct {
 	ReqId string
 	Code  int

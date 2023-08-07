@@ -1,45 +1,38 @@
 package main
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
+	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/simple"
 	"gorm.io/gorm/logger"
 )
 
-type BaseModel struct {
-	Id    uint      `gorm:"primaryKey;"`
-	Ctime time.Time `gorm:"autoCreateTime;comment:'Created Time'" `
-	Utime time.Time `gorm:"autoUpdateTime;comment:'Updated Time'" `
-}
-
-type User struct {
-	BaseModel
-	Name string
-	Age  uint
-}
-
-func test1(c *gin.Context) (data any, err *ginz.Errors) {
-	var users []User
-	// new := &User{
-	// 	Name: "zs",
-	// }
-	// ginz.DB.Create(new)
-	ginz.DB.Model(&User{}).Where("id=999").Find(&users)
-	data = users
-	return
-}
+var App *ginz.Ginz
 
 func main() {
-	ginz.Init(&ginz.Option{
+	App = ginz.Init(&ginz.Option{
 		LoadConfigFile:    true,
 		ConnectDB:         true,
 		AddHealthCheckApi: true,
 		DBLogLevel:        logger.Error,
+		// Middlewares:       []ginz.Middleware{simple.RequireTokenFromCookie()},
 	})
-	ginz.MigrateModels(&User{})
-	ginz.AddApi("add", "", ginz.CreateOneHandler[User]())
-	ginz.AddApi("get", "", test1)
-	ginz.Run()
+
+	App.MigrateModels(&simple.User{})
+
+	group1 := App.Group("/api")
+	group1.AddApi("login", simple.UserLoginHandler(App.Config.SecretKey, App.Config.TokenExpiredTime))
+	group1.AddApi("register", simple.UserRegisterHandler())
+
+	group2 := App.Group("/api")
+	group2.Use(simple.RequireTokenFromCookie(App.Config.SecretKey, App.Config.TokenExpiredTime))
+	group2.AddApi("test", func(c *gin.Context) (data any, err *ginz.Err) {
+		data, er := crud.QueryAll[simple.User](nil, nil)
+		if er != nil {
+			err = ginz.ErrDBQueryFailed.Add(er.Error())
+		}
+		return
+	})
+	App.Run()
 }

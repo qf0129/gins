@@ -18,10 +18,7 @@ type Option struct {
 	Middlewares        []Middleware
 }
 
-func (option *Option) Load() {
-	if option.DefaultGroupPrefix == "" {
-		option.DefaultGroupPrefix = "/api"
-	}
+func (option *Option) InitValue() {
 	if option.DBLogLevel == 0 {
 		option.DBLogLevel = logger.Info
 	}

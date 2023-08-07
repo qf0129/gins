@@ -1,11 +1,12 @@
 package ginz
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/qf0129/ginz/pkg/strs"
 )
 
-type ApiHandler func(c *gin.Context) (data any, err *Err)
+type ApiHandler func(c *gin.Context) (any, *Err)
 
 type Api struct {
 	Name      string
@@ -21,15 +22,31 @@ type ApiGroup struct {
 	Apis        []*Api
 }
 
+// 使用中间件
+func (group *ApiGroup) Use(middleware Middleware) {
+	group.RouterGroup.Use(func(ctx *gin.Context) {
+		middleware(ctx)
+	})
+}
+
+// 添加api对象
 func (group *ApiGroup) Add(api *Api) {
 	group.Apis = append(group.Apis, api)
 	group.RouterGroup.Handle(api.Method, api.Name, func(c *gin.Context) {
-		c.Set(REQUEST_KEY_ID, strs.UUID())
 		data, err := api.Handler(c)
-		if err == nil {
-			RespOk(c, data)
-		} else {
+		if err != nil {
 			RespErr(c, err)
+		} else {
+			RespOk(c, data)
 		}
+	})
+}
+
+// 添加api对象
+func (group *ApiGroup) AddApi(name string, handler ApiHandler) {
+	group.Add(&Api{
+		Name:    name,
+		Method:  http.MethodPost,
+		Handler: handler,
 	})
 }

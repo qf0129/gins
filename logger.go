@@ -11,10 +11,10 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func LoadLogger() {
+func LoadLogger(level string) {
 	log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime)
 
-	lv, err := logrus.ParseLevel(Config.LogLevel)
+	lv, err := logrus.ParseLevel(level)
 	if err != nil {
 		log.Panic("InvalidLogLevel", err)
 	}

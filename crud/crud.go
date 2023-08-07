@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
+const (
 	CrudDefaultPageSize   = 10
 	CrudDefaultPrimaryKey = "id"
 )

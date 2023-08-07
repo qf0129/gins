@@ -3,28 +3,21 @@ package ginz
 import (
 	"fmt"
 
-	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-var DB *gorm.DB
-
-type DbOption struct {
-	ShowLog bool
-}
-
-func (app *Ginz) ConnectDB() {
-	var database *gorm.DB
-
+// 连接数据库
+func (ginz *Ginz) ConnectDB() {
 	gormConf := &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		Logger: logger.Default.LogMode(app.Option.DBLogLevel),
+		Logger: logger.Default.LogMode(ginz.Option.DBLogLevel),
 		// NowFunc: func() time.Time {
 		// 	return time.Now().Local()
 		// },
@@ -32,27 +25,27 @@ func (app *Ginz) ConnectDB() {
 	// logrus.Info(fmt.Sprintf("DB log level is %d", app.Option.DBLogLevel))
 
 	var dbConn gorm.Dialector
-	if Config.DbEngine == "mysql" {
-		dbUri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", Config.DbUser, Config.DbPsd, Config.DbHost, Config.DbPort, Config.DbDatabase)
+	if ginz.Config.DbEngine == "mysql" {
+		dbUri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", ginz.Config.DbUser, ginz.Config.DbPsd, ginz.Config.DbHost, ginz.Config.DbPort, ginz.Config.DbDatabase)
 		dbConn = mysql.Open(dbUri)
-		logrus.Info(fmt.Sprintf("Connected DB on MySQL: %s@%s", Config.DbUser, Config.DbHost))
-	} else if Config.DbEngine == "sqlite" {
-		dbConn = sqlite.Open(Config.SqliteFile)
-		logrus.Info(fmt.Sprintf("Connected DB on Sqlite: %s", Config.SqliteFile))
+		logrus.Info(fmt.Sprintf("Connected DB on MySQL: %s@%s", ginz.Config.DbUser, ginz.Config.DbHost))
+	} else if ginz.Config.DbEngine == "sqlite" {
+		dbConn = sqlite.Open(ginz.Config.SqliteFile)
+		logrus.Info(fmt.Sprintf("Connected DB on Sqlite: %s", ginz.Config.SqliteFile))
 	} else {
 		logrus.Panic("InvalidDbType")
 	}
 
-	database, err := gorm.Open(dbConn, gormConf)
+	var err error
+	ginz.DB, err = gorm.Open(dbConn, gormConf)
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
-
-	DB = database
 }
 
-func MigrateModels(dst ...any) {
-	if err := DB.AutoMigrate(dst...); err != nil {
+// 迁移数据模型
+func (ginz *Ginz) MigrateModels(dst ...any) {
+	if err := ginz.DB.AutoMigrate(dst...); err != nil {
 		logrus.Panic("AutoMigrateErr:", err)
 		return
 	}

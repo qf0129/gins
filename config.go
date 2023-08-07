@@ -2,7 +2,6 @@ package ginz
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"reflect"
 
@@ -32,7 +31,7 @@ type Configuration struct {
 	SecretKey string
 
 	// 令牌过期时间，单位秒
-	TokenExpiredTime uint
+	TokenExpiredTime int64
 
 	Custom map[string]any
 }
@@ -91,61 +90,59 @@ func (c *Configuration) Remove(k string) {
 	delete(c.Custom, k)
 }
 
-var Config = &Configuration{
-	DbEngine:   "sqlite",
-	SqliteFile: "sqlite.db",
+func getDefaultConfig() *Configuration {
+	return &Configuration{
+		DbEngine:   "sqlite",
+		SqliteFile: "sqlite.db",
 
-	DbHost:     "127.0.0.1",
-	DbPort:     3306,
-	DbUser:     "root",
-	DbPsd:      "root",
-	DbDatabase: "test",
+		DbHost:     "127.0.0.1",
+		DbPort:     3306,
+		DbUser:     "root",
+		DbPsd:      "root",
+		DbDatabase: "test",
 
-	PrimaryKey:      "id",
-	DefaultPageSize: 10,
+		PrimaryKey:      "id",
+		DefaultPageSize: 10,
 
-	AppHost:    "",
-	AppPort:    8080,
-	AppMode:    "debug",
-	AppTimeout: 60,
-	LogLevel:   "debug",
+		AppHost:    "",
+		AppPort:    8080,
+		AppMode:    "debug",
+		AppTimeout: 60,
+		LogLevel:   "debug",
 
-	SecretKey:        "Abcd@123",
-	TokenExpiredTime: 7200,
+		SecretKey:        "Abcd@123",
+		TokenExpiredTime: 7200,
 
-	Custom: make(map[string]any),
+		Custom: make(map[string]any),
+	}
 }
 
-func LoadConfigFile() error {
+func (ginz *Ginz) LoadConfig() {
+	ginz.Config = getDefaultConfig()
 	// 读取json文件
 	data, err := os.ReadFile("config.json")
 	if err != nil {
 		logrus.Warn("Can not find config.json")
-		return err
 	}
 
-	// json数据解析到配置
-	err = json.Unmarshal(data, &Config)
+	// 解析内置配置项
+	err = json.Unmarshal(data, &ginz.Config)
 	if err != nil {
-		fmt.Println("json unmarshal failed, err:", err)
-		return err
+		logrus.Warn("json unmarshal failed, err:", err)
 	}
 
-	// json数据解析到map
+	// 解析自定义配置项
 	var m map[string]any
 	err = json.Unmarshal(data, &m)
 	if err != nil {
-		fmt.Println("json unmarshal failed, err:", err)
-		return err
+		logrus.Warn("json unmarshal failed, err:", err)
 	}
 
-	// 加载json配置
+	// 遍历自定义配置项，不是内置项则放到Custom里
 	for k, v := range m {
-		// 判断不包含的key，放到自定义配置里
-		_, ok := reflect.TypeOf(*Config).FieldByName(k)
+		_, ok := reflect.TypeOf(&ginz.Config).FieldByName(k)
 		if !ok {
-			Config.Set(k, v)
+			ginz.Config.Set(k, v)
 		}
 	}
-	return nil
 }
