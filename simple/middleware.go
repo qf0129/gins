@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
 	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/secures"
 )
 
 const TokenKey = "tk"
@@ -18,7 +19,7 @@ func RequireTokenFromCookie(secretKey string, expiredSeconds int64) ginz.Middlew
 			return
 		}
 
-		uid, err := ginz.ParseToken(tk, secretKey, expiredSeconds)
+		uid, err := secures.ParseToken(tk, secretKey, expiredSeconds)
 		if err != nil {
 			ginz.RespErr(c, ginz.ErrInvalidToken.Add(err.Error()))
 			return

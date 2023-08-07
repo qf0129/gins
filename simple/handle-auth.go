@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
 	"github.com/qf0129/ginz/crud"
-	"github.com/qf0129/ginz/pkg/encrypt"
+	"github.com/qf0129/ginz/pkg/secures"
 )
 
 type AuthRequestBody struct {
@@ -38,12 +38,12 @@ func UserLoginHandler(secretKey string, expiredSeconds int64) ginz.ApiHandler {
 			return
 		}
 
-		if !encrypt.VerifyPassword(req.Password, existUser.PasswordHash) {
+		if !secures.VerifyPassword(req.Password, existUser.PasswordHash) {
 			err = ginz.ErrIncorrectPassword
 			return
 		}
 
-		token, er := ginz.CreateToken(existUser.Id, secretKey)
+		token, er := secures.CreateToken(existUser.Id, secretKey)
 		if er != nil {
 			err = ginz.ErrCreateToken
 			return
@@ -81,7 +81,7 @@ func UserRegisterHandler() ginz.ApiHandler {
 			return
 		}
 
-		psdHash, er := encrypt.HashPassword(req.Password)
+		psdHash, er := secures.HashPassword(req.Password)
 		if er != nil {
 			err = ginz.ErrHashPassword
 			return

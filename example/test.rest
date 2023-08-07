@@ -20,7 +20,6 @@ post {{HOST}}/api/register
     "password": "qf"
 }
 
-
 ###
 post {{HOST}}/api/login
 

@@ -1,12 +1,10 @@
-package ginz
+package secures
 
 import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"time"
-
-	"github.com/qf0129/ginz/pkg/encrypt"
 )
 
 var ErrTokenExpired = errors.New("TokenExpired")
@@ -19,7 +17,7 @@ func CreateToken(body string, secretKey string) (string, error) {
 		tokenByte[i+8] = byte(v)
 	}
 
-	token, err := encrypt.DesEncrypt(tokenByte, []byte(secretKey))
+	token, err := DesEncrypt(tokenByte, []byte(secretKey))
 	return hex.EncodeToString(token), err
 }
 
@@ -29,7 +27,7 @@ func ParseToken(token string, secretKey string, expiredSeconds int64) (string, e
 	if err != nil {
 		return "", err
 	}
-	tokenStr, err := encrypt.DesDecrypt([]byte(text), []byte(secretKey))
+	tokenStr, err := DesDecrypt([]byte(text), []byte(secretKey))
 	if err != nil {
 		return "", err
 	}

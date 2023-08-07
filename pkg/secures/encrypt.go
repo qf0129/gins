@@ -1,4 +1,4 @@
-package encrypt
+package secures
 
 import (
 	"bytes"
