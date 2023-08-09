@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/qf0129/ginz/pkg/errs"
 )
 
 // type PageBody struct {
@@ -32,7 +33,7 @@ func RespOk(c *gin.Context, data any) {
 	c.Abort()
 }
 
-func RespErr(c *gin.Context, err *Err) {
+func RespErr(c *gin.Context, err *errs.Err) {
 	c.JSON(http.StatusOK, RespBody{
 		ReqId: c.GetString(REQUEST_KEY_ID),
 		Code:  err.Code,

@@ -91,36 +91,33 @@ func (c *Configuration) Remove(k string) {
 	delete(c.Custom, k)
 }
 
-func getDefaultConfig() *Configuration {
-	return &Configuration{
-		DbEngine:   "sqlite",
-		SqliteFile: "sqlite.db",
+var Config = Configuration{
+	DbEngine:   "sqlite",
+	SqliteFile: "sqlite.db",
 
-		DbHost:     "127.0.0.1",
-		DbPort:     3306,
-		DbUser:     "root",
-		DbPsd:      "root",
-		DbDatabase: "test",
+	DbHost:     "127.0.0.1",
+	DbPort:     3306,
+	DbUser:     "root",
+	DbPsd:      "root",
+	DbDatabase: "test",
 
-		QueryPrimaryKey: "id",
-		DefaultPageSize: 10,
+	QueryPrimaryKey: "id",
+	DefaultPageSize: 10,
 
-		AppHost:    "",
-		AppPort:    8080,
-		AppMode:    "debug",
-		AppTimeout: 60,
-		LogLevel:   "debug",
+	AppHost:    "",
+	AppPort:    8080,
+	AppMode:    "debug",
+	AppTimeout: 60,
+	LogLevel:   "debug",
 
-		Secret:           "Abcd@123",
-		TokenKey:         "tk",
-		TokenExpiredTime: 7200,
+	Secret:           "Abcd@123",
+	TokenKey:         "tk",
+	TokenExpiredTime: 7200,
 
-		Custom: make(map[string]any),
-	}
+	Custom: make(map[string]any),
 }
 
-func (ginz *Ginz) LoadConfig() {
-	ginz.Config = getDefaultConfig()
+func LoadConfig() {
 	// 读取json文件
 	data, err := os.ReadFile("config.json")
 	if err != nil {
@@ -128,7 +125,7 @@ func (ginz *Ginz) LoadConfig() {
 	}
 
 	// 解析内置配置项
-	err = json.Unmarshal(data, &ginz.Config)
+	err = json.Unmarshal(data, &Config)
 	if err != nil {
 		logrus.Warn("json unmarshal failed, err:", err)
 	}
@@ -142,9 +139,9 @@ func (ginz *Ginz) LoadConfig() {
 
 	// 遍历自定义配置项，不是内置项则放到Custom里
 	for k, v := range m {
-		_, ok := reflect.TypeOf(&ginz.Config).FieldByName(k)
+		_, ok := reflect.TypeOf(&Config).FieldByName(k)
 		if !ok {
-			ginz.Config.Set(k, v)
+			Config.Set(k, v)
 		}
 	}
 }

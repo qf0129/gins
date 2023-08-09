@@ -14,8 +14,8 @@ import (
 
 type FilteFunc func(tx *gorm.DB) *gorm.DB
 
-func ParseUrlFilters(vals url.Values) map[string]string {
-	filters := map[string]string{}
+func ParseUrlFilters(vals url.Values) map[string]any {
+	filters := map[string]any{}
 	for k := range vals {
 		if !arrays.HasStrItem(FIXED_KEYS, k) {
 			filters[k] = vals.Get(k)
@@ -28,15 +28,15 @@ func ParseFilters(filters map[string]any) (funcs []FilteFunc) {
 	for k, v := range filters {
 		ks := strings.Split(k, ":")
 		if len(ks) == 2 {
-			funcs = append(funcs, FilteKeyFunc(ks[0], ks[1], v.(string)))
+			funcs = append(funcs, FilteKeyFunc(ks[0], ks[1], v))
 		} else {
-			funcs = append(funcs, FilteKeyFunc(k, "eq", v.(string)))
+			funcs = append(funcs, FilteKeyFunc(k, "eq", v))
 		}
 	}
 	return
 }
 
-func FilteKeyFunc(key string, operater string, val string) FilteFunc {
+func FilteKeyFunc(key string, operater string, val any) FilteFunc {
 	return func(tx *gorm.DB) *gorm.DB {
 		switch operater {
 		case "eq":
@@ -52,9 +52,9 @@ func FilteKeyFunc(key string, operater string, val string) FilteFunc {
 		case "le":
 			return tx.Where(fmt.Sprintf("`%s` <= ?", key), val)
 		case "in":
-			return tx.Where(fmt.Sprintf("`%s` in ?", key), strings.Split(val, ","))
+			return tx.Where(fmt.Sprintf("`%s` in ?", key), strings.Split(val.(string), ","))
 		case "ni":
-			return tx.Where(fmt.Sprintf("`%s` not in ?", key), strings.Split(val, ","))
+			return tx.Where(fmt.Sprintf("`%s` not in ?", key), strings.Split(val.(string), ","))
 		case "ct":
 			return tx.Where(fmt.Sprintf("`%s` like '%%%s%%'", key, val))
 		case "nc":

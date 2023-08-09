@@ -11,7 +11,7 @@ func QueryPage[T GormModel](filters map[string]any, fixedOptions ...*FixedOption
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
 	}
-	if query.Count(&result.Total).Error != nil {
+	if err = query.Count(&result.Total).Error; err != nil {
 		return
 	}
 
@@ -56,10 +56,9 @@ func QueryAll[T GormModel](filters map[string]any, preloads ...string) (result [
 	return
 }
 
-func ExistByPk[T GormModel](pk any) (result bool, err error) {
+func ExistByPk[T GormModel](pk any) (err error) {
 	item := new(T)
-	err = DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk}).First(&item).Error
-	return err == nil, err
+	return DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk}).First(&item).Error
 }
 
 func QueryOneByPk[T GormModel](pk any) (result T, err error) {

@@ -10,7 +10,7 @@ get {{HOST}}/health
 
 ###
 post {{HOST}}/api/test1
-Cookie: tk=d9ad085c281b8781cdc1bf89a5fdc0df26c488d7bf830ea81dbbf0c7e5be35b6
+Cookie: tk=51a4e49f131d01f1b5ff3250cc88ee3c23c53aff3ddb5305089d94f49339a697
 
 ###
 post {{HOST}}/api/test2

@@ -25,13 +25,13 @@ func (ginz *Ginz) ConnectDB() {
 	// logrus.Info(fmt.Sprintf("DB log level is %d", app.Option.DBLogLevel))
 
 	var dbConn gorm.Dialector
-	if ginz.Config.DbEngine == "mysql" {
-		dbUri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", ginz.Config.DbUser, ginz.Config.DbPsd, ginz.Config.DbHost, ginz.Config.DbPort, ginz.Config.DbDatabase)
+	if Config.DbEngine == "mysql" {
+		dbUri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", Config.DbUser, Config.DbPsd, Config.DbHost, Config.DbPort, Config.DbDatabase)
 		dbConn = mysql.Open(dbUri)
-		logrus.Info(fmt.Sprintf("Connected DB on MySQL: %s@%s", ginz.Config.DbUser, ginz.Config.DbHost))
-	} else if ginz.Config.DbEngine == "sqlite" {
-		dbConn = sqlite.Open(ginz.Config.SqliteFile)
-		logrus.Info(fmt.Sprintf("Connected DB on Sqlite: %s", ginz.Config.SqliteFile))
+		logrus.Info(fmt.Sprintf("Connected DB on MySQL: %s@%s", Config.DbUser, Config.DbHost))
+	} else if Config.DbEngine == "sqlite" {
+		dbConn = sqlite.Open(Config.SqliteFile)
+		logrus.Info(fmt.Sprintf("Connected DB on Sqlite: %s", Config.SqliteFile))
 	} else {
 		logrus.Panic("InvalidDbType")
 	}

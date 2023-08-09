@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
 	"github.com/qf0129/ginz/pkg/dao"
+	"github.com/qf0129/ginz/pkg/errs"
 	"github.com/qf0129/ginz/pkg/secures"
 )
 
@@ -13,77 +14,77 @@ type AuthRequestBody struct {
 }
 
 // 用户登录接口
-func UserLoginHandler(app *ginz.Ginz) ginz.ApiHandler {
-	return func(c *gin.Context) (data any, err *ginz.Err) {
+func UserLoginHandler() ginz.ApiHandler {
+	return func(c *gin.Context) (data any, err *errs.Err) {
 		var req AuthRequestBody
 
 		if er := c.ShouldBindJSON(&req); er != nil {
-			err = ginz.ErrInvalidParams.Add(er.Error())
+			err = errs.ErrInvalidParams.Add(er.Error())
 			return
 		}
 
 		if req.Username == "" {
-			err = ginz.ErrInvalidParams.Add("Username")
+			err = errs.ErrInvalidParams.Add("Username")
 			return
 		}
 
 		if req.Password == "" {
-			err = ginz.ErrInvalidParams.Add("Password")
+			err = errs.ErrInvalidParams.Add("Password")
 			return
 		}
 
 		existUser, er := dao.QueryOneByMap[User](map[string]any{"username": req.Username})
 		if er != nil {
-			err = ginz.ErrUserNotFound
+			err = errs.ErrUserNotFound
 			return
 		}
 
 		if !secures.VerifyPassword(req.Password, existUser.PasswordHash) {
-			err = ginz.ErrIncorrectPassword
+			err = errs.ErrIncorrectPassword
 			return
 		}
 
-		token, er := secures.CreateToken(existUser.Id, app.Config.Secret)
+		token, er := secures.CreateToken(existUser.Id, ginz.Config.Secret)
 		if er != nil {
-			err = ginz.ErrCreateToken
+			err = errs.ErrCreateToken
 			return
 		}
-		c.SetCookie("tk", token, int(app.Config.TokenExpiredTime), "/", "*", true, true)
-		c.SetCookie("uid", existUser.Id, int(app.Config.TokenExpiredTime), "/", "*", true, false)
+		c.SetCookie("tk", token, int(ginz.Config.TokenExpiredTime), "/", "*", true, true)
+		c.SetCookie("uid", existUser.Id, int(ginz.Config.TokenExpiredTime), "/", "*", true, false)
 		data = map[string]any{"Token": token}
 		return
 	}
 }
 
 // 用户注册接口
-func UserRegisterHandler(app *ginz.Ginz) ginz.ApiHandler {
-	return func(c *gin.Context) (data any, err *ginz.Err) {
+func UserRegisterHandler() ginz.ApiHandler {
+	return func(c *gin.Context) (data any, err *errs.Err) {
 		var req AuthRequestBody
 
 		if er := c.ShouldBindJSON(&req); er != nil {
-			err = ginz.ErrInvalidParams.Add(er.Error())
+			err = errs.ErrInvalidParams.Add(er.Error())
 			return
 		}
 
 		if req.Username == "" {
-			err = ginz.ErrInvalidParams.Add("username")
+			err = errs.ErrInvalidParams.Add("username")
 			return
 		}
 
 		if req.Password == "" {
-			err = ginz.ErrInvalidParams.Add("password")
+			err = errs.ErrInvalidParams.Add("password")
 			return
 		}
 
 		existUser, _ := dao.QueryOneByMap[User](map[string]any{"username": req.Username})
 		if existUser.Id != "" {
-			err = ginz.ErrUserAlreadyExists
+			err = errs.ErrUserAlreadyExists
 			return
 		}
 
 		psdHash, er := secures.HashPassword(req.Password)
 		if er != nil {
-			err = ginz.ErrHashPassword
+			err = errs.ErrHashPassword
 			return
 		}
 
@@ -93,7 +94,7 @@ func UserRegisterHandler(app *ginz.Ginz) ginz.ApiHandler {
 		}
 
 		if er = dao.CreateOne[User](u); er != nil {
-			err = ginz.ErrCreateUser.Add(er.Error())
+			err = errs.ErrCreateUser.Add(er.Error())
 			return
 		}
 		data = map[string]any{"Id": u.Id}

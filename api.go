@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/qf0129/ginz/pkg/errs"
 )
 
-type ApiHandler func(c *gin.Context) (any, *Err)
+type ApiHandler func(c *gin.Context) (any, *errs.Err)
 
 type Api struct {
 	Name      string

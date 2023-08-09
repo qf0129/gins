@@ -20,17 +20,17 @@ func Init(option *Option) (ginz *Ginz) {
 	option.InitValue()
 	LoadLogger("debug")
 	if option.LoadConfigFile {
-		ginz.LoadConfig()
-		LoadLogger(ginz.Config.LogLevel)
+		LoadConfig()
+		LoadLogger(Config.LogLevel)
 	}
 
-	gin.SetMode(ginz.Config.AppMode)
+	gin.SetMode(Config.AppMode)
 	if option.ConnectDB {
 		ginz.ConnectDB()
 		dao.Init(&dao.DaoOption{
 			DB:              ginz.DB,
-			DefaultPageSize: ginz.Config.DefaultPageSize,
-			QueryPrimaryKey: ginz.Config.QueryPrimaryKey,
+			DefaultPageSize: Config.DefaultPageSize,
+			QueryPrimaryKey: Config.QueryPrimaryKey,
 		})
 	}
 
@@ -52,24 +52,24 @@ func Init(option *Option) (ginz *Ginz) {
 }
 
 type Ginz struct {
-	Engine    *gin.Engine
-	DB        *gorm.DB
-	Option    *Option
-	Config    *Configuration
+	Engine *gin.Engine
+	DB     *gorm.DB
+	Option *Option
+	// Config    *Configuration
 	ApiGroup  *ApiGroup
 	ApiGroups []*ApiGroup
 }
 
 // 运行服务
 func (ginz *Ginz) Run() {
-	listenAddr := fmt.Sprintf("%s:%d", ginz.Config.AppHost, ginz.Config.AppPort)
+	listenAddr := fmt.Sprintf("%s:%d", Config.AppHost, Config.AppPort)
 	svr := &http.Server{
 		Handler:      ginz.Engine,
 		Addr:         listenAddr,
-		ReadTimeout:  time.Duration(ginz.Config.AppTimeout) * time.Second,
-		WriteTimeout: time.Duration(ginz.Config.AppTimeout) * time.Second,
+		ReadTimeout:  time.Duration(Config.AppTimeout) * time.Second,
+		WriteTimeout: time.Duration(Config.AppTimeout) * time.Second,
 	}
-	logrus.Info("Run with " + ginz.Config.AppMode + " mode ")
+	logrus.Info("Run with " + Config.AppMode + " mode ")
 	logrus.Info("Server is listening " + listenAddr)
 	svr.ListenAndServe()
 }
