@@ -1,17 +1,12 @@
-package crud
+package dao
 
 import (
 	"reflect"
 	"strings"
 )
 
-/**
- * @Description: ${todo}
- * @receiver ${receiver}
- * @param ${params}
- * @return ${return_types}
- */
-func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]any) (result PageBody[T], err error) {
+// 查询分页数据
+func QueryPage[T GormModel](filters map[string]any, fixedOptions ...*FixedOption) (result PageBody[T], err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
@@ -20,20 +15,24 @@ func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]any) (r
 		return
 	}
 
-	if fixedOption == nil {
+	var fixedOption *FixedOption
+	if len(fixedOptions) > 0 {
+		fixedOption = fixedOptions[0]
+	} else {
 		fixedOption = &FixedOption{
 			Page:     1,
 			PageSize: 10,
 		}
 	}
-	for _, field := range strings.Split(fixedOption.Preload, ",") {
-		query = FiltePreloadFunc(field)(query)
+
+	for _, preload := range strings.Split(fixedOption.Preload, ",") {
+		query = FiltePreloadFunc(preload)(query)
 	}
 	if fixedOption.Page < 1 {
 		fixedOption.Page = 1
 	}
 	if fixedOption.PageSize < 1 {
-		fixedOption.PageSize = CrudDefaultPageSize
+		fixedOption.PageSize = DefaultPageSize
 	}
 
 	result.Page = fixedOption.Page
@@ -43,14 +42,14 @@ func QueryPage[T GormModel](fixedOption *FixedOption, filters map[string]any) (r
 	return
 }
 
-func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]any) (result []T, err error) {
+func QueryAll[T GormModel](filters map[string]any, preloads ...string) (result []T, err error) {
 	query := DB.Model(new(T))
 	for _, fc := range ParseFilters(filters) {
 		query = fc(query)
 	}
-	if fixedOption != nil {
-		for _, field := range strings.Split(fixedOption.Preload, ",") {
-			query = FiltePreloadFunc(field)(query)
+	for _, preloadStr := range preloads {
+		for _, preload := range strings.Split(preloadStr, ",") {
+			query = FiltePreloadFunc(preload)(query)
 		}
 	}
 	err = query.Find(&result).Error
@@ -59,17 +58,17 @@ func QueryAll[T GormModel](fixedOption *FixedOption, filters map[string]any) (re
 
 func ExistByPk[T GormModel](pk any) (result bool, err error) {
 	item := new(T)
-	err = DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).First(&item).Error
+	err = DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk}).First(&item).Error
 	return err == nil, err
 }
 
 func QueryOneByPk[T GormModel](pk any) (result T, err error) {
-	err = DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).First(&result).Error
+	err = DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk}).First(&result).Error
 	return
 }
 
 func QueryOneByPkWithPreload[T GormModel](pk any, preload string) (result T, err error) {
-	query := DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk})
+	query := DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk})
 	for _, field := range strings.Split(preload, ",") {
 		query = FiltePreloadFunc(field)(query)
 	}
@@ -116,11 +115,11 @@ func CreateOneWithParentId[T GormModel](obj any, parentIdKey string, parentIdVal
 }
 
 func UpdateOneByPk[T GormModel](pk any, data any) error {
-	return DB.Model(new(T)).Where(map[string]any{CrudDefaultPrimaryKey: pk}).Updates(data).Error
+	return DB.Model(new(T)).Where(map[string]any{QueryPrimaryKey: pk}).Updates(data).Error
 }
 
 func DeleteOneByPk[T GormModel](pk any) error {
-	return DB.Where(map[string]any{CrudDefaultPrimaryKey: pk}).Delete(new(T)).Error
+	return DB.Where(map[string]any{QueryPrimaryKey: pk}).Delete(new(T)).Error
 }
 
 func HasField[T GormModel](field string) bool {

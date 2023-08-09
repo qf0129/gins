@@ -1,12 +1,7 @@
-package crud
+package dao
 
 import (
 	"gorm.io/gorm"
-)
-
-const (
-	CrudDefaultPageSize   = 10
-	CrudDefaultPrimaryKey = "id"
 )
 
 type GormModel any
@@ -33,8 +28,20 @@ type PageBody[T any] struct {
 	Total    int64
 }
 
-var DB *gorm.DB
+var (
+	DB              *gorm.DB
+	DefaultPageSize = 10
+	QueryPrimaryKey = "id"
+)
 
-func Init(db *gorm.DB) {
-	DB = db
+type DaoOption struct {
+	DB              *gorm.DB
+	DefaultPageSize int
+	QueryPrimaryKey string
+}
+
+func Init(option *DaoOption) {
+	DB = option.DB
+	DefaultPageSize = option.DefaultPageSize
+	QueryPrimaryKey = option.QueryPrimaryKey
 }

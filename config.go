@@ -18,8 +18,8 @@ type Configuration struct {
 	DbPsd      string
 	DbDatabase string
 
-	PrimaryKey      string
 	DefaultPageSize int
+	QueryPrimaryKey string
 
 	AppHost    string
 	AppPort    uint
@@ -28,8 +28,9 @@ type Configuration struct {
 	LogLevel   string
 
 	// 加密算法密钥
-	SecretKey string
+	Secret string
 
+	TokenKey string
 	// 令牌过期时间，单位秒
 	TokenExpiredTime int64
 
@@ -101,7 +102,7 @@ func getDefaultConfig() *Configuration {
 		DbPsd:      "root",
 		DbDatabase: "test",
 
-		PrimaryKey:      "id",
+		QueryPrimaryKey: "id",
 		DefaultPageSize: 10,
 
 		AppHost:    "",
@@ -110,7 +111,8 @@ func getDefaultConfig() *Configuration {
 		AppTimeout: 60,
 		LogLevel:   "debug",
 
-		SecretKey:        "Abcd@123",
+		Secret:           "Abcd@123",
+		TokenKey:         "tk",
 		TokenExpiredTime: 7200,
 
 		Custom: make(map[string]any),

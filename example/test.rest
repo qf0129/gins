@@ -9,8 +9,11 @@
 get {{HOST}}/health
 
 ###
-post {{HOST}}/api/test
+post {{HOST}}/api/test1
 Cookie: tk=d9ad085c281b8781cdc1bf89a5fdc0df26c488d7bf830ea81dbbf0c7e5be35b6
+
+###
+post {{HOST}}/api/test2
 
 ###
 post {{HOST}}/api/register

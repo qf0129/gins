@@ -1,4 +1,4 @@
-package crud
+package dao
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 
 type FilteFunc func(tx *gorm.DB) *gorm.DB
 
-func GetUrlFilters(vals url.Values) map[string]string {
+func ParseUrlFilters(vals url.Values) map[string]string {
 	filters := map[string]string{}
 	for k := range vals {
 		if !arrays.HasStrItem(FIXED_KEYS, k) {

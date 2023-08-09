@@ -5,27 +5,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
-	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/pkg/secures"
 )
 
-const TokenKey = "tk"
-
-func RequireTokenFromCookie(secretKey string, expiredSeconds int64) ginz.Middleware {
+func RequireTokenFromCookie(app *ginz.Ginz) ginz.Middleware {
 	return func(c *gin.Context) {
-		tk, err := c.Cookie(TokenKey)
+		tk, err := c.Cookie(app.Config.TokenKey)
 		if err != nil {
 			ginz.RespErr(c, ginz.ErrInvalidToken.Add(err.Error()))
 			return
 		}
 
-		uid, err := secures.ParseToken(tk, secretKey, expiredSeconds)
+		uid, err := secures.ParseToken(tk, app.Config.Secret, app.Config.TokenExpiredTime)
 		if err != nil {
 			ginz.RespErr(c, ginz.ErrInvalidToken.Add(err.Error()))
 			return
 		}
 
-		existsUser, err := crud.QueryOneByPk[User](uid)
+		existsUser, err := dao.QueryOneByPk[User](uid)
 		if err != nil {
 			ginz.RespErr(c, ginz.ErrUserNotFound.Add(err.Error()))
 			return
@@ -36,7 +34,7 @@ func RequireTokenFromCookie(secretKey string, expiredSeconds int64) ginz.Middlew
 }
 
 // 跨域请求
-func CorsMiddleware() ginz.Middleware {
+func CorsMiddleware(app *ginz.Ginz) ginz.Middleware {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")

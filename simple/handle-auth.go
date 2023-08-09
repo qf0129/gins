@@ -3,7 +3,7 @@ package simple
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
-	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/pkg/secures"
 )
 
@@ -13,7 +13,7 @@ type AuthRequestBody struct {
 }
 
 // 用户登录接口
-func UserLoginHandler(secretKey string, expiredSeconds int64) ginz.ApiHandler {
+func UserLoginHandler(app *ginz.Ginz) ginz.ApiHandler {
 	return func(c *gin.Context) (data any, err *ginz.Err) {
 		var req AuthRequestBody
 
@@ -32,7 +32,7 @@ func UserLoginHandler(secretKey string, expiredSeconds int64) ginz.ApiHandler {
 			return
 		}
 
-		existUser, er := crud.QueryOneByMap[User](map[string]any{"username": req.Username})
+		existUser, er := dao.QueryOneByMap[User](map[string]any{"username": req.Username})
 		if er != nil {
 			err = ginz.ErrUserNotFound
 			return
@@ -43,20 +43,20 @@ func UserLoginHandler(secretKey string, expiredSeconds int64) ginz.ApiHandler {
 			return
 		}
 
-		token, er := secures.CreateToken(existUser.Id, secretKey)
+		token, er := secures.CreateToken(existUser.Id, app.Config.Secret)
 		if er != nil {
 			err = ginz.ErrCreateToken
 			return
 		}
-		c.SetCookie("tk", token, int(expiredSeconds), "/", "*", true, true)
-		c.SetCookie("uid", existUser.Id, int(expiredSeconds), "/", "*", true, false)
+		c.SetCookie("tk", token, int(app.Config.TokenExpiredTime), "/", "*", true, true)
+		c.SetCookie("uid", existUser.Id, int(app.Config.TokenExpiredTime), "/", "*", true, false)
 		data = map[string]any{"Token": token}
 		return
 	}
 }
 
 // 用户注册接口
-func UserRegisterHandler() ginz.ApiHandler {
+func UserRegisterHandler(app *ginz.Ginz) ginz.ApiHandler {
 	return func(c *gin.Context) (data any, err *ginz.Err) {
 		var req AuthRequestBody
 
@@ -75,7 +75,7 @@ func UserRegisterHandler() ginz.ApiHandler {
 			return
 		}
 
-		existUser, _ := crud.QueryOneByMap[User](map[string]any{"username": req.Username})
+		existUser, _ := dao.QueryOneByMap[User](map[string]any{"username": req.Username})
 		if existUser.Id != "" {
 			err = ginz.ErrUserAlreadyExists
 			return
@@ -92,7 +92,7 @@ func UserRegisterHandler() ginz.ApiHandler {
 			PasswordHash: psdHash,
 		}
 
-		if er = crud.CreateOne[User](u); er != nil {
+		if er = dao.CreateOne[User](u); er != nil {
 			err = ginz.ErrCreateUser.Add(er.Error())
 			return
 		}

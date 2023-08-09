@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/pkg/strs"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -27,7 +27,11 @@ func Init(option *Option) (ginz *Ginz) {
 	gin.SetMode(ginz.Config.AppMode)
 	if option.ConnectDB {
 		ginz.ConnectDB()
-		crud.Init(ginz.DB)
+		dao.Init(&dao.DaoOption{
+			DB:              ginz.DB,
+			DefaultPageSize: ginz.Config.DefaultPageSize,
+			QueryPrimaryKey: ginz.Config.QueryPrimaryKey,
+		})
 	}
 
 	if len(option.Middlewares) > 0 {

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz"
-	"github.com/qf0129/ginz/crud"
+	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/simple"
 	"gorm.io/gorm/logger"
 )
@@ -22,13 +22,17 @@ func main() {
 	App.MigrateModels(&simple.User{})
 
 	group1 := App.Group("/api")
-	group1.AddApi("login", simple.UserLoginHandler(App.Config.SecretKey, App.Config.TokenExpiredTime))
-	group1.AddApi("register", simple.UserRegisterHandler())
+	group1.AddApi("login", simple.UserLoginHandler(App))
+	group1.AddApi("register", simple.UserRegisterHandler(App))
+	group1.AddApi("test2", func(c *gin.Context) (data any, err *ginz.Err) {
+
+		return
+	})
 
 	group2 := App.Group("/api")
-	group2.Use(simple.RequireTokenFromCookie(App.Config.SecretKey, App.Config.TokenExpiredTime))
-	group2.AddApi("test", func(c *gin.Context) (data any, err *ginz.Err) {
-		data, er := crud.QueryAll[simple.User](nil, nil)
+	group2.Use(simple.RequireTokenFromCookie(App))
+	group2.AddApi("test1", func(c *gin.Context) (data any, err *ginz.Err) {
+		data, er := dao.QueryAll[simple.User](nil)
 		if er != nil {
 			err = ginz.ErrDBQueryFailed.Add(er.Error())
 		}
