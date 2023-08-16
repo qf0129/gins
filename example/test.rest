@@ -10,18 +10,7 @@ get {{HOST}}/health
 
 ###
 post {{HOST}}/api/test1
-Cookie: tk=51a4e49f131d01f1b5ff3250cc88ee3c23c53aff3ddb5305089d94f49339a697
-
-###
-post {{HOST}}/api/test2
-
-###
-post {{HOST}}/api/register
-
-{
-    "username": "qf2",
-    "password": "qf"
-}
+Cookie: tk=2222b22b1ce31f7cae0dcf259fceef245f60f7df21f1b1fbfc593a710f12747f
 
 ###
 post {{HOST}}/api/login
@@ -29,4 +18,42 @@ post {{HOST}}/api/login
 {
     "username": "qf",
     "password": "qf"
+}
+
+###
+post {{HOST}}/api/register
+
+{
+    "username": "qf",
+    "password": "qf"
+}
+
+###
+post {{HOST}}/api/QueryUser
+
+{
+    "Page": 1,
+    "PageSize": 10,
+    "Filters": {
+        "username:ne": "11"
+    }
+}
+###
+post {{HOST}}/api/CreateUser
+
+{
+    "username":"11"
+}
+###
+post {{HOST}}/api/UpdateUser
+
+{
+    "id":"",
+    "username":"ccc"
+}
+###
+post {{HOST}}/api/DeleteUser
+
+{
+    "id":""
 }

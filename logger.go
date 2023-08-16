@@ -27,7 +27,7 @@ func LoadLogger(level string) {
 	// 	TimestampFormat: "2006-01-02 15:04:05",
 	// })
 	// 设置为自定义格式
-	logrus.SetFormatter(&MyFormatter{})
+	logrus.SetFormatter(&Formatter{})
 
 	// logfile, _ := os.OpenFile("./logs/app.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
 
@@ -48,10 +48,9 @@ func LoadLogger(level string) {
 	// gin.DefaultWriter = io.MultiWriter(os.Stdout, rotateLogger)
 }
 
-type MyFormatter struct {
-}
+type Formatter struct{}
 
-func (m *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (m *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	var b *bytes.Buffer
 	if entry.Buffer != nil {
 		b = entry.Buffer

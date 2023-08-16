@@ -19,6 +19,7 @@ type FixedOption struct {
 	PageSize    int    // 每页数量，默认10
 	Preload     string // 预加载关联表名，若多个以英文逗号分隔
 	ClosePaging bool   // 关闭分页，默认false
+	Filters     map[string]any
 }
 
 type PageBody[T any] struct {

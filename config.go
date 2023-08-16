@@ -93,7 +93,7 @@ func (c *Configuration) Remove(k string) {
 
 var Config = Configuration{
 	DbEngine:   "sqlite",
-	SqliteFile: "sqlite.db",
+	SqliteFile: "db.sqlite",
 
 	DbHost:     "127.0.0.1",
 	DbPort:     3306,

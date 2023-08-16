@@ -7,10 +7,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/qf0129/ginz/pkg/dao"
-	"github.com/qf0129/ginz/pkg/strs"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
+
+type Middleware func(*Context)
+
+type Option struct {
+	LoadConfigFile     bool
+	ConnectDB          bool
+	AddHealthCheckApi  bool
+	DBLogLevel         logger.LogLevel
+	DefaultGroupPrefix string
+	PrimaryKey         string
+	DefaultPageSize    int
+	Middlewares        []Middleware
+	Models             []any
+}
+
+func (option *Option) InitValue() {
+	if option.DBLogLevel == 0 {
+		option.DBLogLevel = logger.Info
+	}
+}
 
 // 初始化
 func Init(option *Option) (ginz *Ginz) {
@@ -25,6 +45,7 @@ func Init(option *Option) (ginz *Ginz) {
 	}
 
 	gin.SetMode(Config.AppMode)
+
 	if option.ConnectDB {
 		ginz.ConnectDB()
 		dao.Init(&dao.DaoOption{
@@ -32,22 +53,20 @@ func Init(option *Option) (ginz *Ginz) {
 			DefaultPageSize: Config.DefaultPageSize,
 			QueryPrimaryKey: Config.QueryPrimaryKey,
 		})
+		ginz.MigrateModels(option.Models...)
 	}
 
 	if len(option.Middlewares) > 0 {
 		for _, mid := range option.Middlewares {
-			ginz.Engine.Use(func(ctx *gin.Context) { mid(ctx) })
+			ginz.Use(mid)
 		}
 	}
-	ginz.Engine.Use(func(ctx *gin.Context) {
-		ctx.Set(REQUEST_KEY_ID, strs.UUID())
-		// ctx.Next()
-	})
 	ginz.Engine.Use(gin.Logger(), gin.Recovery())
 
 	if option.AddHealthCheckApi {
-		ginz.Engine.GET("/health", func(ctx *gin.Context) { RespOk(ctx, "ok") })
+		ginz.ApiGroup.GET("/health", func(c *Context) { c.ReturnOk("ok") })
 	}
+
 	return ginz
 }
 
