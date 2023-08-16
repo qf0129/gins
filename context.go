@@ -52,7 +52,7 @@ func (c *Context) ShouldBindJSON(obj any) *errs.Err {
 var Validator = validator.New()
 
 func (c *Context) Validate(obj any) *errs.Err {
-	err := Validator.Struct(&obj)
+	err := Validator.Struct(obj)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return nil

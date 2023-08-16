@@ -8,8 +8,8 @@ import (
 )
 
 type AuthRequestBody struct {
-	Username string `validate:"gt=2"`
-	Password string `validate:"gt=2"`
+	Username string `validate:"gte=2,lte=50"`
+	Password string `validate:"gte=2,lte=50"`
 }
 
 // 用户登录接口
