@@ -1,0 +1,22 @@
+{
+    "DbEngine": "mysql",
+    "SqliteFile": "sqlite.db",
+    
+    "DbHost": "127.0.0.1",
+    "DbPort": 3306,
+    "DbUser": "root",
+    "DbPsd": "123456",
+    "DbDatabase": "database",
+
+        "PrimaryKey":      "id",
+        "DefaultPageSize": 10,
+    
+    "AppHost": "",
+    "AppPort": 8080,
+    "AppMode": "debug",
+    "AppTimeout": 10,
+    "LogLevel": "debug",
+    
+    "SecretKey":"Abcd@123",
+    "TokenExpiredTime": 3600
+}

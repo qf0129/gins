@@ -139,7 +139,7 @@ func LoadConfig() {
 
 	// 遍历自定义配置项，不是内置项则放到Custom里
 	for k, v := range m {
-		_, ok := reflect.TypeOf(&Config).FieldByName(k)
+		_, ok := reflect.TypeOf(Config).FieldByName(k)
 		if !ok {
 			Config.Set(k, v)
 		}

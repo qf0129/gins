@@ -19,13 +19,20 @@ type BaseUidModel struct {
 	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
 }
 
+type BaseAssociatedModel struct {
+	Ctime time.Time      `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
+	Dtime gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-"`
+}
+
 type BaseUidModelWithDel struct {
 	BaseUidModel
 	Dtime gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-"`
 }
 
 func (m *BaseUidModel) BeforeCreate(tx *gorm.DB) (err error) {
-	m.Id = xid.New().String()
+	if m.Id == "" {
+		m.Id = xid.New().String()
+	}
 	return
 }
 

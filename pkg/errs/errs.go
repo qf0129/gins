@@ -16,6 +16,10 @@ func (err *Err) Add(msg string) *Err {
 	return &Err{Code: err.Code, Msg: err.Msg + ":" + msg}
 }
 
+func (err *Err) AddErr(er error) *Err {
+	return &Err{Code: err.Code, Msg: err.Msg + ":" + er.Error()}
+}
+
 func (err *Err) Args(args ...any) *Err {
 	return &Err{Code: err.Code, Msg: fmt.Sprintf(err.Msg, args...)}
 }

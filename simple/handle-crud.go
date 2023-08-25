@@ -6,9 +6,33 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/qf0129/ginz"
+	"github.com/qf0129/ginz/pkg/arrays"
 	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/pkg/errs"
+	"github.com/sirupsen/logrus"
 )
+
+func CreateCrudRouter[T dao.GormModel](group *ginz.ApiGroup, methods ...string) {
+	modelName := reflect.TypeOf(new(T)).Elem().Name()
+	if modelName == "" {
+		logrus.Fatalf("InvalidModelName: %s", modelName)
+	}
+	if len(methods) == 0 {
+		methods = []string{"c", "r", "u", "d"}
+	}
+	if arrays.HasStrItem(methods, "c") {
+		group.AddApi("Create"+modelName, CreateModelHandler[T]())
+	}
+	if arrays.HasStrItem(methods, "r") {
+		group.AddApi("Query"+modelName, QueryModelHandler[T]())
+	}
+	if arrays.HasStrItem(methods, "u") {
+		group.AddApi("Update"+modelName, UpdateModelHandler[T]())
+	}
+	if arrays.HasStrItem(methods, "d") {
+		group.AddApi("Delete"+modelName, DeleteModelHandler[T]())
+	}
+}
 
 func QueryModelHandler[T dao.GormModel]() ginz.ApiHandler {
 	return func(c *ginz.Context) {
