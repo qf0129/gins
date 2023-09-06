@@ -8,19 +8,19 @@ import (
 )
 
 type BaseModel struct {
-	Id    uint      `gorm:"primaryKey;" json:"id" form:"id"`
-	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
-	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
+	Id    uint      `gorm:"primaryKey;"`
+	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'"`
+	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'"`
 }
 
 type BaseUidModel struct {
-	Id    string    `gorm:"primaryKey;type:varchar(50);" json:"id"`
-	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
-	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
+	Id    string    `gorm:"primaryKey;type:varchar(50);"`
+	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'"`
+	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'"`
 }
 
 type BaseAssociatedModel struct {
-	Ctime time.Time      `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
+	Ctime time.Time      `gorm:"autoCreateTime;comment:'CreatedTime'"`
 	Dtime gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-"`
 }
 
@@ -38,6 +38,6 @@ func (m *BaseUidModel) BeforeCreate(tx *gorm.DB) (err error) {
 
 type User struct {
 	BaseUidModelWithDel
-	Username     string `gorm:"index;type:varchar(50)" json:"username"  form:"username"`
-	PasswordHash string `gorm:"type:varchar(200)" json:"-"  form:"password_hash"`
+	Username     string `gorm:"index;type:varchar(50)"`
+	PasswordHash string `gorm:"type:varchar(200)" json:"-"`
 }

@@ -28,19 +28,13 @@ type ApiGroup struct {
 // 使用中间件
 func (group *ApiGroup) Use(middleware Middleware) {
 	group.RouterGroup.Use(func(ctx *gin.Context) {
-		middleware(&Context{C: ctx})
+		middleware(&Context{C: ctx, ReqId: strs.UUID()})
 	})
 }
 
 func (group *ApiGroup) Handle(httpMethod, relativePath string, handler ApiHandler) gin.IRoutes {
 	return group.RouterGroup.Handle(httpMethod, relativePath, func(ctx *gin.Context) {
 		handler(&Context{C: ctx, ReqId: strs.UUID()})
-		return
-		// if err != nil {
-		// 	c.ReturnErr(err)
-		// } else {
-		// 	c.ReturnOk(data)
-		// }
 	})
 }
 

@@ -86,3 +86,12 @@ func UserRegisterHandler() ginz.ApiHandler {
 		c.ReturnOk(map[string]any{"Id": u.Id})
 	}
 }
+
+// 获取用户信息接口
+func GetUserInfoHandler() ginz.ApiHandler {
+	return func(c *ginz.Context) {
+		user, _ := c.C.Get("user")
+		user = user.(User)
+		c.ReturnOk(user)
+	}
+}

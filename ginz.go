@@ -34,8 +34,14 @@ func (option *Option) InitValue() {
 
 // 初始化
 func Init(option *Option) (ginz *Ginz) {
-	ginz = &Ginz{Engine: gin.New(), Option: option}
-	ginz.ApiGroup = ginz.Group(option.DefaultGroupPrefix)
+	ginz = &Ginz{
+		Engine: gin.New(),
+		Option: option,
+	}
+	ginz.ApiGroup = ginz.AddGroup(&ApiGroup{
+		BasePath:    option.DefaultGroupPrefix,
+		RouterGroup: &ginz.Engine.RouterGroup,
+	})
 
 	option.InitValue()
 	LoadLogger("debug")
@@ -61,7 +67,8 @@ func Init(option *Option) (ginz *Ginz) {
 			ginz.Use(mid)
 		}
 	}
-	ginz.Engine.Use(gin.Logger(), gin.Recovery())
+	ginz.Engine.Use(gin.Logger())
+	ginz.Use(Recovery())
 
 	if option.AddHealthCheckApi {
 		ginz.ApiGroup.GET("/health", func(c *Context) { c.ReturnOk("ok") })
@@ -99,6 +106,10 @@ func (ginz *Ginz) Group(basePath string) *ApiGroup {
 		BasePath:    basePath,
 		RouterGroup: ginz.Engine.Group(basePath),
 	}
+	ginz.AddGroup(group)
+	return group
+}
+func (ginz *Ginz) AddGroup(group *ApiGroup) *ApiGroup {
 	ginz.ApiGroups = append(ginz.ApiGroups, group)
 	return group
 }

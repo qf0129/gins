@@ -26,6 +26,7 @@ func (err *Err) Args(args ...any) *Err {
 
 // common
 var (
+	RequestError       = &Err{Code: 1000100, Msg: "请求错误"}
 	CreateDataFailed   = &Err{Code: 1000101, Msg: "新建数据失败"}
 	QueryDataFailed    = &Err{Code: 1000102, Msg: "查询数据失败"}
 	RetrieveDataFailed = &Err{Code: 1000102, Msg: "查询数据失败"}
@@ -34,8 +35,10 @@ var (
 	DataNotExists      = &Err{Code: 1000105, Msg: "数据不存在"}
 
 	InvalidParams       = &Err{Code: 1000201, Msg: "无效的参数"}
-	ValidateParamFailed = &Err{Code: 1000202, Msg: "校验参数失败"}
-	ParseParamFailed    = &Err{Code: 1000203, Msg: "解析参数失败"}
+	InvalidHeader       = &Err{Code: 1000202, Msg: "无效的请求头"}
+	ValidateParamFailed = &Err{Code: 1000203, Msg: "校验参数失败"}
+	ParseParamFailed    = &Err{Code: 1000204, Msg: "解析参数失败"}
+	NoPermission        = &Err{Code: 1000205, Msg: "没有权限"}
 
 	AuthFailed        = &Err{Code: 1000301, Msg: "认证失败"}
 	InvalidToken      = &Err{Code: 1000302, Msg: "无效的令牌"}

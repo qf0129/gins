@@ -83,3 +83,7 @@ func (c *Context) ReturnErr(err *errs.Err) {
 	})
 	c.C.Abort()
 }
+
+func (c *Context) Panic(err *errs.Err) {
+	panic(err)
+}
