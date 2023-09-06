@@ -1,6 +1,7 @@
 package ginz
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -82,6 +83,14 @@ func (c *Context) ReturnErr(err *errs.Err) {
 		Data:  nil,
 	})
 	c.C.Abort()
+}
+
+func (c *Context) ReturnAnyErr(err any) {
+	if er, ok := err.(*errs.Err); ok {
+		c.ReturnErr(er)
+	} else {
+		c.ReturnErr(errs.RequestError.Add(fmt.Sprintf("%v", err)))
+	}
 }
 
 func (c *Context) Panic(err *errs.Err) {

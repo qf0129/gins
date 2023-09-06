@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/qf0129/ginz/pkg/errs"
 )
 
 var (
@@ -23,18 +22,6 @@ var (
 	slash     = []byte("/")
 	reset     = "\033[0m"
 )
-
-func recoveryFunc(c *Context, err any) {
-	if er, ok := err.(*errs.Err); ok {
-		c.ReturnErr(er)
-	} else if er, ok := err.(*error); ok {
-		c.ReturnErr(errs.RequestError.AddErr(*er))
-	} else if er, ok := err.(*string); ok {
-		c.ReturnErr(errs.RequestError.Add(*er))
-	} else {
-		c.ReturnErr(errs.RequestError.Add(fmt.Sprintf("%v", err)))
-	}
-}
 
 func Recovery() Middleware {
 	logger := log.New(os.Stderr, "\n\n\x1b[31m", log.LstdFlags)
@@ -80,7 +67,7 @@ func Recovery() Middleware {
 					c.C.Error(err.(error)) //nolint: errcheck
 					c.C.Abort()
 				} else {
-					recoveryFunc(c, err)
+					c.ReturnAnyErr(err)
 				}
 			}
 		}()
