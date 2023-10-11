@@ -57,3 +57,29 @@ post {{HOST}}/api/DeleteUser
 {
     "id":""
 }
+
+###
+get {{HOST}}/api/user
+
+###
+get {{HOST}}/api/user?Filter=ctime:lt:2023-08-17|UsErName:ct:3&PageNum=1&PageSize=5
+
+###
+get {{HOST}}/api/user/ckikis2p7ov953nb2dhg
+
+###
+post {{HOST}}/api/user
+
+{
+    "Username": "zs5"
+}
+
+###
+put {{HOST}}/api/user/ckikis2p7ov953nb2dhg
+
+{
+    "Username": "zs2"
+}
+
+###
+delete {{HOST}}/api/user/ckj6t4ap7ovdairsvi4g

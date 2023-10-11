@@ -6,51 +6,55 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/qf0129/ginz"
+	"github.com/qf0129/ginz/dao"
 	"github.com/qf0129/ginz/pkg/arrays"
-	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/qf0129/ginz/pkg/errs"
 	"github.com/sirupsen/logrus"
 )
 
-func CreateCrudRouter[T dao.GormModel](group *ginz.ApiGroup, methods ...string) {
+func CreateRestApis[T dao.GormModel](group *ginz.ApiGroup, methods ...string) {
 	modelName := reflect.TypeOf(new(T)).Elem().Name()
 	if modelName == "" {
 		logrus.Fatalf("InvalidModelName: %s", modelName)
 	}
+	tableName := ginz.GormConf.NamingStrategy.TableName(modelName)
 	if len(methods) == 0 {
 		methods = []string{"c", "r", "u", "d"}
 	}
 	if arrays.HasStrItem(methods, "c") {
-		group.AddApi("Create"+modelName, CreateModelHandler[T]())
+		group.POST(tableName, CreateHandler[T]())
 	}
 	if arrays.HasStrItem(methods, "r") {
-		group.AddApi("Query"+modelName, QueryModelHandler[T]())
+		group.GET(tableName, QueryManyHandler[T]())
+		group.GET(tableName+"/:"+ginz.Config.DBPrimaryKey, QueryOneHandler[T]())
 	}
 	if arrays.HasStrItem(methods, "u") {
-		group.AddApi("Update"+modelName, UpdateModelHandler[T]())
+		group.PUT(tableName+"/:"+ginz.Config.DBPrimaryKey, UpdateHandler[T]())
 	}
 	if arrays.HasStrItem(methods, "d") {
-		group.AddApi("Delete"+modelName, DeleteModelHandler[T]())
+		group.DELETE(tableName+"/:"+ginz.Config.DBPrimaryKey, DeleteHandler[T]())
 	}
 }
 
-func QueryModelHandler[T dao.GormModel]() ginz.ApiHandler {
+func QueryManyHandler[T any]() ginz.ApiHandler {
 	return func(c *ginz.Context) {
-		var fixedOptions *dao.FixedOption
-		err := c.ShouldBindJSON(&fixedOptions)
+		queryBody := &dao.QueryBody{}
+		err := c.ShouldBindQuery(&queryBody)
 		if err != nil {
 			c.ReturnErr(err)
 			return
 		}
-		if fixedOptions.ClosePaging {
-			data, er := dao.QueryAll[T](fixedOptions.Filters, fixedOptions.Preload)
+		if queryBody.NoPaging {
+			// 不分页
+			data, er := dao.QueryAll[T](queryBody)
 			if er != nil {
 				c.ReturnErr(errs.RetrieveDataFailed.Add(er.Error()))
 				return
 			}
 			c.ReturnOk(data)
 		} else {
-			data, er := dao.QueryPage[T](fixedOptions.Filters, fixedOptions)
+			// 分页
+			data, er := dao.QueryPage[T](queryBody)
 			if er != nil {
 				c.ReturnErr(errs.RetrieveDataFailed.Add(er.Error()))
 				return
@@ -60,14 +64,29 @@ func QueryModelHandler[T dao.GormModel]() ginz.ApiHandler {
 	}
 }
 
-func CreateModelHandler[T dao.GormModel]() ginz.ApiHandler {
+func QueryOneHandler[T any]() ginz.ApiHandler {
+	return func(c *ginz.Context) {
+		pk := c.Param(ginz.Config.DBPrimaryKey)
+		if pk == "" {
+			c.ReturnErr(errs.InvalidParams.Add("主键为空"))
+			return
+		}
+		data, er := dao.QueryOneByPk[T](pk)
+		if er != nil {
+			c.ReturnErr(errs.RetrieveDataFailed.Add(er.Error()))
+			return
+		}
+		c.ReturnOk(data)
+	}
+}
+
+func CreateHandler[T any]() ginz.ApiHandler {
 	return func(c *ginz.Context) {
 		var model T
 		if er := c.ShouldBindJSON(&model); er != nil {
 			c.ReturnErr(er)
 			return
 		}
-
 		er := dao.CreateOne[T](&model)
 		if er != nil {
 			c.ReturnErr(errs.CreateDataFailed.Add(er.Error()))
@@ -77,15 +96,10 @@ func CreateModelHandler[T dao.GormModel]() ginz.ApiHandler {
 	}
 }
 
-func DeleteModelHandler[T dao.GormModel]() ginz.ApiHandler {
+func DeleteHandler[T any]() ginz.ApiHandler {
 	return func(c *ginz.Context) {
-		body := make(map[string]any)
-		if err := c.ShouldBindJSON(&body); err != nil {
-			c.ReturnErr(err)
-			return
-		}
-		pk, ok := body[ginz.Config.QueryPrimaryKey]
-		if !ok || pk == "" {
+		pk := c.Param(ginz.Config.DBPrimaryKey)
+		if pk == "" {
 			c.ReturnErr(errs.InvalidParams.Add("主键为空"))
 			return
 		}
@@ -105,15 +119,15 @@ func DeleteModelHandler[T dao.GormModel]() ginz.ApiHandler {
 	}
 }
 
-func UpdateModelHandler[T dao.GormModel]() ginz.ApiHandler {
+func UpdateHandler[T any]() ginz.ApiHandler {
 	return func(c *ginz.Context) {
 		body := make(map[string]any)
 		if err := c.ShouldBindJSON(&body); err != nil {
 			c.ReturnErr(err)
 			return
 		}
-		pk, ok := body[ginz.Config.QueryPrimaryKey]
-		if !ok || pk == "" {
+		pk := c.Param(ginz.Config.DBPrimaryKey)
+		if pk == "" {
 			c.ReturnErr(errs.InvalidParams.Add("主键为空"))
 			return
 		}

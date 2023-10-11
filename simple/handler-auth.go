@@ -2,7 +2,7 @@ package simple
 
 import (
 	"github.com/qf0129/ginz"
-	"github.com/qf0129/ginz/pkg/dao"
+	"github.com/qf0129/ginz/dao"
 	"github.com/qf0129/ginz/pkg/errs"
 	"github.com/qf0129/ginz/pkg/secures"
 )
@@ -25,7 +25,6 @@ func UserLoginHandler() ginz.ApiHandler {
 			c.ReturnErr(err)
 			return
 		}
-
 		existUser, er := dao.QueryOneByMap[User](map[string]any{"username": req.Username})
 		if er != nil {
 			c.ReturnErr(errs.UserNotFound)

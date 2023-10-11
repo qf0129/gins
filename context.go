@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/qf0129/ginz/pkg/errs"
+	"github.com/qf0129/ginz/pkg/maps"
 )
 
 type CommonReq struct {
@@ -50,19 +51,49 @@ func (c *Context) ShouldBindJSON(obj any) *errs.Err {
 	return c.ShouldBindWith(obj, binding.JSON)
 }
 
+func (c *Context) ShouldBindQuery(obj any) *errs.Err {
+	return c.ShouldBindWith(obj, binding.Query)
+}
+
 var Validator = validator.New()
 
-func (c *Context) Validate(obj any) *errs.Err {
-	err := Validator.Struct(obj)
+func (c *Context) Validate(data any) *errs.Err {
+	err := Validator.Struct(data)
 	if err != nil {
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			return nil
-		}
-		for _, err := range err.(validator.ValidationErrors) {
-			return errs.ValidateParamFailed.Add(err.Field())
+		if errList, ok := err.(validator.ValidationErrors); ok {
+			for _, e := range errList {
+				return errs.ValidateParamFailed.Add(e.Field())
+			}
+		} else {
+			return errs.ValidateParamFailed.Add(err.Error())
 		}
 	}
 	return nil
+}
+
+func (c *Context) ValidateMap(data, rules map[string]any) *errs.Err {
+	errMap := Validator.ValidateMap(data, rules)
+	k, err := maps.GetFirstOfMap(errMap)
+	if err != nil {
+		return errs.ValidateParamFailed.Add(k)
+	}
+	return nil
+}
+
+func (c *Context) ParseAndValidate(data any) *errs.Err {
+	err := c.ShouldBindJSON(data)
+	if err != nil {
+		return err
+	}
+	return c.Validate(data)
+}
+
+func (c *Context) ParseAndValidateToMap(data, rules map[string]any) *errs.Err {
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		return err
+	}
+	return c.ValidateMap(data, rules)
 }
 
 func (c *Context) ReturnOk(data any) {
@@ -85,6 +116,16 @@ func (c *Context) ReturnErr(err *errs.Err) {
 	c.C.Abort()
 }
 
+func (c *Context) ReturnAuthErr(err *errs.Err) {
+	c.C.JSON(http.StatusUnauthorized, RespBody{
+		ReqId: c.ReqId,
+		Code:  err.Code,
+		Msg:   err.Msg,
+		Data:  nil,
+	})
+	c.C.Abort()
+}
+
 func (c *Context) ReturnAnyErr(err any) {
 	if er, ok := err.(*errs.Err); ok {
 		c.ReturnErr(er)
@@ -95,4 +136,40 @@ func (c *Context) ReturnAnyErr(err any) {
 
 func (c *Context) Panic(err *errs.Err) {
 	panic(err)
+}
+
+func (c *Context) Next() {
+	c.C.Next()
+}
+
+func (c *Context) SetCookie(name, value string, maxAge int, path, domain string, secure, httpOnly bool) {
+	c.C.SetCookie(name, value, maxAge, path, domain, secure, httpOnly)
+}
+
+func (c *Context) Cookie(name string) (string, error) {
+	return c.C.Cookie(name)
+}
+
+func (c *Context) Set(key string, value any) {
+	c.C.Set(key, value)
+}
+
+func (c *Context) Get(key string) (value any, exists bool) {
+	return c.C.Get(key)
+}
+
+func (c *Context) MustGet(key string) any {
+	return c.C.MustGet(key)
+}
+
+func (c *Context) GetString(key string) (s string) {
+	return c.C.GetString(key)
+}
+
+func (c *Context) GetBool(key string) (b bool) {
+	return c.C.GetBool(key)
+}
+
+func (c *Context) GetInt(key string) (i int) {
+	return c.C.GetInt(key)
 }

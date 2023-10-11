@@ -11,9 +11,14 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+var (
+	GormConf *gorm.Config
+	DB       *gorm.DB
+)
+
 // 连接数据库
 func (ginz *Ginz) ConnectDB() {
-	gormConf := &gorm.Config{
+	GormConf = &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -37,7 +42,7 @@ func (ginz *Ginz) ConnectDB() {
 	}
 
 	var err error
-	ginz.DB, err = gorm.Open(dbConn, gormConf)
+	DB, err = gorm.Open(dbConn, GormConf)
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
@@ -45,7 +50,7 @@ func (ginz *Ginz) ConnectDB() {
 
 // 迁移数据模型
 func (ginz *Ginz) MigrateModels(dst ...any) {
-	if err := ginz.DB.AutoMigrate(dst...); err != nil {
+	if err := DB.AutoMigrate(dst...); err != nil {
 		logrus.Panic("AutoMigrateErr:", err)
 		return
 	}

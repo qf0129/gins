@@ -6,9 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/qf0129/ginz/pkg/dao"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
@@ -54,11 +52,6 @@ func Init(option *Option) (ginz *Ginz) {
 
 	if option.ConnectDB {
 		ginz.ConnectDB()
-		dao.Init(&dao.DaoOption{
-			DB:              ginz.DB,
-			DefaultPageSize: Config.DefaultPageSize,
-			QueryPrimaryKey: Config.QueryPrimaryKey,
-		})
 		ginz.MigrateModels(option.Models...)
 	}
 
@@ -78,12 +71,12 @@ func Init(option *Option) (ginz *Ginz) {
 }
 
 type Ginz struct {
-	Engine *gin.Engine
-	DB     *gorm.DB
-	Option *Option
-	// Config    *Configuration
+	Engine    *gin.Engine
+	Option    *Option
 	ApiGroup  *ApiGroup
 	ApiGroups []*ApiGroup
+	// DB     *gorm.DB
+	// Config    *Configuration
 }
 
 // 运行服务
@@ -119,7 +112,7 @@ func (ginz *Ginz) Use(middleware Middleware) {
 	ginz.ApiGroup.Use(middleware)
 }
 
-// 默认接口组-添加接口
-func (ginz *Ginz) AddApi(name string, handler ApiHandler) {
-	ginz.ApiGroup.AddApi(name, handler)
-}
+// // 默认接口组-添加接口
+// func (ginz *Ginz) AddApi(name string, handler ApiHandler) {
+// 	ginz.ApiGroup.AddApi(name, handler)
+// }

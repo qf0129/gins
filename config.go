@@ -19,7 +19,7 @@ type Configuration struct {
 	DbDatabase string
 
 	DefaultPageSize int
-	QueryPrimaryKey string
+	DBPrimaryKey    string
 
 	AppHost    string
 	AppPort    uint
@@ -101,7 +101,7 @@ var Config = Configuration{
 	DbPsd:      "root",
 	DbDatabase: "test",
 
-	QueryPrimaryKey: "id",
+	DBPrimaryKey:    "id",
 	DefaultPageSize: 10,
 
 	AppHost:    "",

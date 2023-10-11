@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/qf0129/ginz"
-	"github.com/qf0129/ginz/pkg/dao"
+	"github.com/qf0129/ginz/dao"
 	"github.com/qf0129/ginz/pkg/errs"
 	"github.com/qf0129/ginz/pkg/secures"
 )

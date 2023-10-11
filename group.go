@@ -12,11 +12,10 @@ import (
 type ApiHandler func(c *Context)
 
 type Api struct {
-	Name      string
-	Info      string
-	Method    string
-	Handler   ApiHandler
-	WithCache bool
+	Method   string
+	Path     string
+	Handler  ApiHandler
+	UseCache bool
 }
 
 type ApiGroup struct {
@@ -33,6 +32,11 @@ func (group *ApiGroup) Use(middleware Middleware) {
 }
 
 func (group *ApiGroup) Handle(httpMethod, relativePath string, handler ApiHandler) gin.IRoutes {
+	group.Apis = append(group.Apis, &Api{
+		Method:  httpMethod,
+		Path:    relativePath,
+		Handler: handler,
+	})
 	return group.RouterGroup.Handle(httpMethod, relativePath, func(ctx *gin.Context) {
 		handler(&Context{C: ctx, ReqId: strs.UUID()})
 	})
@@ -46,17 +50,22 @@ func (group *ApiGroup) POST(relativePath string, handler ApiHandler) gin.IRoutes
 	return group.Handle(http.MethodPost, relativePath, handler)
 }
 
-// 添加api对象
-func (group *ApiGroup) Add(api *Api) {
-	group.Apis = append(group.Apis, api)
-	group.Handle(api.Method, api.Name, api.Handler)
+func (group *ApiGroup) DELETE(relativePath string, handlers ApiHandler) gin.IRoutes {
+	return group.Handle(http.MethodDelete, relativePath, handlers)
 }
 
-// 添加api
-func (group *ApiGroup) AddApi(name string, handler ApiHandler) {
-	group.Add(&Api{
-		Name:    name,
-		Method:  http.MethodPost,
-		Handler: handler,
-	})
+func (group *ApiGroup) PATCH(relativePath string, handlers ApiHandler) gin.IRoutes {
+	return group.Handle(http.MethodPatch, relativePath, handlers)
+}
+
+func (group *ApiGroup) PUT(relativePath string, handlers ApiHandler) gin.IRoutes {
+	return group.Handle(http.MethodPut, relativePath, handlers)
+}
+
+func (group *ApiGroup) OPTIONS(relativePath string, handlers ApiHandler) gin.IRoutes {
+	return group.Handle(http.MethodOptions, relativePath, handlers)
+}
+
+func (group *ApiGroup) HEAD(relativePath string, handlers ApiHandler) gin.IRoutes {
+	return group.Handle(http.MethodHead, relativePath, handlers)
 }
