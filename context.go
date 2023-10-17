@@ -12,18 +12,18 @@ import (
 )
 
 type CommonReq struct {
-	Id       string
-	Ids      []string
-	Filter   map[string]any
-	Page     int
-	PageSize int
+	Id       string         `json:"id"`
+	Ids      []string       `json:"ids"`
+	Filter   map[string]any `json:"filter"`
+	Page     int            `json:"page"`
+	PageSize int            `json:"page_size"`
 }
 
 type RespBody struct {
-	ReqId string
-	Code  int
-	Msg   string
-	Data  any
+	ReqId string `json:"req_id"`
+	Code  int    `json:"code"`
+	Msg   string `json:"msg"`
+	Data  any    `json:"data"`
 }
 
 type Context struct {
@@ -35,24 +35,13 @@ func (c *Context) Param(key string) string {
 	return c.C.Params.ByName(key)
 }
 
+func (c *Context) Query(key string) (value string) {
+	return c.C.Query(key)
+}
+
 func (c *Context) GetRequestData() (data *CommonReq) {
 	c.ShouldBindJSON(&data)
 	return
-}
-
-func (c *Context) ShouldBindWith(obj any, b binding.Binding) *errs.Err {
-	if er := b.Bind(c.C.Request, obj); er != nil {
-		return errs.ParseParamFailed.Add(er.Error())
-	}
-	return nil
-}
-
-func (c *Context) ShouldBindJSON(obj any) *errs.Err {
-	return c.ShouldBindWith(obj, binding.JSON)
-}
-
-func (c *Context) ShouldBindQuery(obj any) *errs.Err {
-	return c.ShouldBindWith(obj, binding.Query)
 }
 
 var Validator = validator.New()
@@ -80,7 +69,17 @@ func (c *Context) ValidateMap(data, rules map[string]any) *errs.Err {
 	return nil
 }
 
-func (c *Context) ParseAndValidate(data any) *errs.Err {
+func (c *Context) ShouldBindWith(obj any, b binding.Binding) *errs.Err {
+	if er := b.Bind(c.C.Request, obj); er != nil {
+		return errs.ParseParamFailed.Add(er.Error())
+	}
+	return nil
+}
+
+func (c *Context) ShouldBindJSON(obj any) *errs.Err {
+	return c.ShouldBindWith(obj, binding.JSON)
+}
+func (c *Context) ShouldBindJSONV(data any) *errs.Err {
 	err := c.ShouldBindJSON(data)
 	if err != nil {
 		return err
@@ -88,12 +87,24 @@ func (c *Context) ParseAndValidate(data any) *errs.Err {
 	return c.Validate(data)
 }
 
-func (c *Context) ParseAndValidateToMap(data, rules map[string]any) *errs.Err {
+func (c *Context) ShouldBindJSONVToMap(data, rules map[string]any) *errs.Err {
 	err := c.ShouldBindJSON(&data)
 	if err != nil {
 		return err
 	}
 	return c.ValidateMap(data, rules)
+}
+
+func (c *Context) ShouldBindQuery(obj any) *errs.Err {
+	return c.ShouldBindWith(obj, binding.Query)
+}
+
+func (c *Context) ShouldBindQueryV(data any) *errs.Err {
+	err := c.ShouldBindQuery(data)
+	if err != nil {
+		return err
+	}
+	return c.Validate(data)
 }
 
 func (c *Context) ReturnOk(data any) {

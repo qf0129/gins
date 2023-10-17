@@ -15,11 +15,7 @@ func QueryPage[T any](queryBodys ...*QueryBody) (result PageBody[T], err error) 
 	} else {
 		queryBody = &QueryBody{}
 	}
-
-	if queryBody.FilterMap == nil {
-		queryBody.ParseFilterToMap()
-	}
-
+	queryBody.ParseFilterToMap()
 	if queryBody.PageNum < 1 {
 		queryBody.PageNum = 1
 	}
@@ -28,6 +24,9 @@ func QueryPage[T any](queryBodys ...*QueryBody) (result PageBody[T], err error) 
 	}
 
 	query := ginz.DB.Model(new(T))
+	if len(queryBody.Fields) > 0 {
+		query = query.Select(queryBody.Fields)
+	}
 	for _, fc := range ParseFilters(queryBody.FilterMap) {
 		query = fc(query)
 	}
@@ -47,6 +46,32 @@ func QueryPage[T any](queryBodys ...*QueryBody) (result PageBody[T], err error) 
 }
 
 func QueryAll[T any](queryBodys ...*QueryBody) (result []T, err error) {
+	var queryBody *QueryBody
+	if len(queryBodys) > 0 {
+		queryBody = queryBodys[0]
+	} else {
+		queryBody = &QueryBody{}
+	}
+	if queryBody.FilterMap == nil {
+		queryBody.ParseFilterToMap()
+	}
+
+	query := ginz.DB.Model(new(T))
+	if len(queryBody.Fields) > 0 {
+		query = query.Select(queryBody.Fields)
+	}
+	for _, fc := range ParseFilters(queryBody.FilterMap) {
+		query = fc(query)
+	}
+	if queryBody.Preload != "" {
+		for _, preload := range strings.Split(queryBody.Preload, ",") {
+			query = FiltePreloadFunc(preload)(query)
+		}
+	}
+	err = query.Find(&result).Error
+	return
+}
+func QueryAllToMap[T any](queryBodys ...*QueryBody) (result []map[string]any, err error) {
 	var queryBody *QueryBody
 	if len(queryBodys) > 0 {
 		queryBody = queryBodys[0]
