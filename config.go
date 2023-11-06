@@ -18,6 +18,9 @@ type Configuration struct {
 	DbPsd      string
 	DbDatabase string
 
+	// error|warn|info, default=warn
+	DbLogLevel string
+
 	DefaultPageSize int
 	DBPrimaryKey    string
 
@@ -25,7 +28,9 @@ type Configuration struct {
 	AppPort    uint
 	AppMode    string
 	AppTimeout uint
-	LogLevel   string
+
+	// panic|fatal|error|warn|info|debug|trace
+	LogLevel string
 
 	// 加密算法密钥
 	Secret string
@@ -100,6 +105,7 @@ var Config = Configuration{
 	DbUser:     "root",
 	DbPsd:      "root",
 	DbDatabase: "test",
+	DbLogLevel: "warn",
 
 	DBPrimaryKey:    "id",
 	DefaultPageSize: 10,

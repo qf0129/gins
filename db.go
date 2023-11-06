@@ -2,6 +2,7 @@ package ginz
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
@@ -22,10 +23,15 @@ func (ginz *Ginz) ConnectDB() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		Logger: logger.Default.LogMode(ginz.Option.DBLogLevel),
+		// Logger: logger.Default.LogMode(Config.DbLogLevel),
 		// NowFunc: func() time.Time {
 		// 	return time.Now().Local()
 		// },
+	}
+	if strings.Contains(Config.DbLogLevel, "info") {
+		GormConf.Logger = logger.Default.LogMode(logger.Info)
+	} else if strings.Contains(Config.DbLogLevel, "error") {
+		GormConf.Logger = logger.Default.LogMode(logger.Error)
 	}
 	// logrus.Info(fmt.Sprintf("DB log level is %d", app.Option.DBLogLevel))
 
