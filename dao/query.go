@@ -106,6 +106,9 @@ func QueryOneByPk[T any](pk any) (result T, err error) {
 	err = ginz.DB.Model(new(T)).Where(map[string]any{ginz.Config.DBPrimaryKey: pk}).First(&result).Error
 	return
 }
+func QueryTargetByPk[T any](pk any, tgt any) error {
+	return ginz.DB.Model(new(T)).Where(map[string]any{ginz.Config.DBPrimaryKey: pk}).First(tgt).Error
+}
 
 func QueryOneByPkWithPreload[T any](pk any, preload string) (result T, err error) {
 	query := ginz.DB.Model(new(T)).Where(map[string]any{ginz.Config.DBPrimaryKey: pk})
