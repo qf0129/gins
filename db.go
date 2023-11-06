@@ -3,9 +3,9 @@ package ginz
 import (
 	"fmt"
 
+	"github.com/glebarez/sqlite"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
