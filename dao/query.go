@@ -52,9 +52,7 @@ func QueryAll[T any](queryBodys ...*QueryBody) (result []T, err error) {
 	} else {
 		queryBody = &QueryBody{}
 	}
-	if queryBody.FilterMap == nil {
-		queryBody.ParseFilterToMap()
-	}
+	queryBody.ParseFilterToMap()
 
 	query := ginz.DB.Model(new(T))
 	if len(queryBody.Fields) > 0 {
@@ -78,10 +76,7 @@ func QueryAllToMap[T any](queryBodys ...*QueryBody) (result []map[string]any, er
 	} else {
 		queryBody = &QueryBody{}
 	}
-
-	if queryBody.FilterMap == nil {
-		queryBody.ParseFilterToMap()
-	}
+	queryBody.ParseFilterToMap()
 
 	query := ginz.DB.Model(new(T))
 	for _, fc := range ParseFilters(queryBody.FilterMap) {

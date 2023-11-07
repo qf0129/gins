@@ -36,9 +36,15 @@ func CreateRestApis[T dao.GormModel](group *ginz.ApiGroup, methods ...string) {
 	}
 }
 
-func QueryManyHandler[T any]() ginz.ApiHandler {
+func QueryManyHandler[T any](queryBodys ...*dao.QueryBody) ginz.ApiHandler {
 	return func(c *ginz.Context) {
-		queryBody := &dao.QueryBody{}
+		var queryBody *dao.QueryBody
+		if len(queryBodys) > 0 {
+			queryBody = queryBodys[0]
+		} else {
+			queryBody = &dao.QueryBody{}
+		}
+
 		err := c.ShouldBindQuery(&queryBody)
 		if err != nil {
 			c.ReturnErr(err)
