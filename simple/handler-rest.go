@@ -36,13 +36,13 @@ func CreateRestApis[T dao.GormModel](group *ginz.ApiGroup, methods ...string) {
 	}
 }
 
-func QueryManyHandler[T any](queryBodys ...*dao.QueryBody) ginz.ApiHandler {
+func QueryManyHandler[T any](queryBodys ...dao.QueryBody) ginz.ApiHandler {
 	return func(c *ginz.Context) {
-		var queryBody *dao.QueryBody
+		var queryBody dao.QueryBody
 		if len(queryBodys) > 0 {
 			queryBody = queryBodys[0]
 		} else {
-			queryBody = &dao.QueryBody{}
+			queryBody = dao.QueryBody{}
 		}
 
 		err := c.ShouldBindQuery(&queryBody)
@@ -52,7 +52,7 @@ func QueryManyHandler[T any](queryBodys ...*dao.QueryBody) ginz.ApiHandler {
 		}
 		if queryBody.NoPaging {
 			// 不分页
-			data, er := dao.QueryAll[T](queryBody)
+			data, er := dao.QueryAll[T](&queryBody)
 			if er != nil {
 				c.ReturnErr(errs.RetrieveDataFailed.Add(er.Error()))
 				return
@@ -60,7 +60,7 @@ func QueryManyHandler[T any](queryBodys ...*dao.QueryBody) ginz.ApiHandler {
 			c.ReturnOk(data)
 		} else {
 			// 分页
-			data, er := dao.QueryPage[T](queryBody)
+			data, er := dao.QueryPage[T](&queryBody)
 			if er != nil {
 				c.ReturnErr(errs.RetrieveDataFailed.Add(er.Error()))
 				return
