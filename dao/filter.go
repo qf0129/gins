@@ -3,6 +3,7 @@ package dao
 import (
 	"fmt"
 	"net/url"
+	"reflect"
 	"strings"
 
 	"github.com/qf0129/ginz/pkg/arrays"
@@ -52,9 +53,17 @@ func FilteKeyFunc(key string, operater string, val any) FilteFunc {
 		case "le":
 			return tx.Where(fmt.Sprintf("`%s` <= ?", key), val)
 		case "in":
-			return tx.Where(fmt.Sprintf("`%s` in ?", key), strings.Split(val.(string), ","))
+			if reflect.TypeOf(val).Kind() == reflect.Slice {
+				return tx.Where(fmt.Sprintf("`%s` in ?", key), val)
+			} else {
+				return tx.Where(fmt.Sprintf("`%s` in ?", key), strings.Split(val.(string), ","))
+			}
 		case "ni":
-			return tx.Where(fmt.Sprintf("`%s` not in ?", key), strings.Split(val.(string), ","))
+			if reflect.TypeOf(val).Kind() == reflect.Slice {
+				return tx.Where(fmt.Sprintf("`%s` not in ?", key), val)
+			} else {
+				return tx.Where(fmt.Sprintf("`%s` not in ?", key), strings.Split(val.(string), ","))
+			}
 		case "ct":
 			return tx.Where(fmt.Sprintf("`%s` like '%%%s%%'", key, val))
 		case "nc":

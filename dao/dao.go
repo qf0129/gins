@@ -22,11 +22,11 @@ type PageBody[T any] struct {
 
 // 查询结构体
 type QueryBody struct {
-	PageNum   int            `json:"page_num" form:"page_num"`     // 页数，默认1
-	PageSize  int            `json:"page_size" form:"page_size"`   // 每页数量，默认10
-	Preload   string         `json:"preload" form:"preload"`       // 预加载关联表名，若多个以英文逗号分隔
-	NoPaging  bool           `json:"no_paging" form:"no_paging"`   // 关闭分页，默认false
-	Filter    string         `json:"filter" form:"filter"`         // 过滤条件
+	PageNum   int            `json:"page_num" form:"page_num"`     // 页数, 默认1
+	PageSize  int            `json:"page_size" form:"page_size"`   // 每页数量, 默认10
+	Preload   string         `json:"preload" form:"preload"`       // 预加载关联表名, 若多个以英文逗号分隔
+	NoPaging  bool           `json:"no_paging" form:"no_paging"`   // 关闭分页, 默认false
+	Filter    string         `json:"filter" form:"filter"`         // 过滤条件, 'key1:value1|key2:value2'
 	FilterMap map[string]any `json:"filter_map" form:"filter_map"` // 过滤条件map
 	Fields    []string       `json:"fields" form:"fields"`         // 查询字段
 }

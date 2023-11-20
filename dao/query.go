@@ -91,6 +91,23 @@ func QueryAllToMap[T any](queryBodys ...*QueryBody) (result []map[string]any, er
 	err = query.Find(&result).Error
 	return
 }
+func QueryAllCount[T any](queryBodys ...*QueryBody) (total int64, err error) {
+	var queryBody *QueryBody
+	if len(queryBodys) > 0 {
+		queryBody = queryBodys[0]
+	} else {
+		queryBody = &QueryBody{}
+	}
+	queryBody.ParseFilterToMap()
+
+	query := ginz.DB.Model(new(T))
+	for _, fc := range ParseFilters(queryBody.FilterMap) {
+		query = fc(query)
+	}
+
+	err = query.Count(&total).Error
+	return
+}
 
 func ExistByPk[T any](pk any) (err error) {
 	item := new(T)
@@ -152,8 +169,16 @@ func CreateOneWithParentId[T any](obj any, parentIdKey string, parentIdVal strin
 	return ginz.DB.Model(new(T)).Create(&obj).Error
 }
 
+func UpdateByMap[T any](filters map[string]any, data any) error {
+	return ginz.DB.Model(new(T)).Where(filters).Updates(data).Error
+}
+
 func UpdateOneByPk[T any](pk any, data any) error {
 	return ginz.DB.Model(new(T)).Where(map[string]any{ginz.Config.DBPrimaryKey: pk}).Updates(data).Error
+}
+
+func DeleteByMap[T any](filters map[string]any) error {
+	return ginz.DB.Where(filters).Delete(new(T)).Error
 }
 
 func DeleteOneByPk[T any](pk any) error {

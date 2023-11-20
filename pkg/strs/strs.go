@@ -3,6 +3,7 @@ package strs
 import (
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -43,4 +44,15 @@ func SnakeToCamelCase(text string) string {
 	temp := strings.ReplaceAll(text, "_", " ")
 	temp = cases.Title(language.Und).String(temp)
 	return strings.ReplaceAll(temp, " ", "")
+}
+
+// 是否为整数或浮点数
+func IsNumeric(s string) bool {
+	if _, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return true // 字符串全是整数
+	}
+	if _, err := strconv.ParseFloat(s, 64); err == nil {
+		return true // 字符串全是浮点数
+	}
+	return false
 }
