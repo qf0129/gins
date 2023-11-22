@@ -188,3 +188,7 @@ func DeleteOneByPk[T any](pk any) error {
 func HasField[T any](field string) bool {
 	return ginz.DB.Model(new(T)).Select(field).Take(new(T)).Error == nil
 }
+
+func Save(obj any) error {
+	return ginz.DB.Save(obj).Error
+}

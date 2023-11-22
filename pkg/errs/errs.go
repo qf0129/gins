@@ -33,6 +33,7 @@ var (
 	UpdateDataFailed   = &Err{Code: 1000103, Msg: "更新数据失败"}
 	DeleteDataFailed   = &Err{Code: 1000104, Msg: "删除数据失败"}
 	DataNotExists      = &Err{Code: 1000105, Msg: "数据不存在"}
+	DataAlreadyExists  = &Err{Code: 1000106, Msg: "数据已存在"}
 
 	InvalidParams       = &Err{Code: 1000201, Msg: "无效的参数"}
 	InvalidHeader       = &Err{Code: 1000202, Msg: "无效的请求头"}

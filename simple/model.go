@@ -8,25 +8,25 @@ import (
 )
 
 type BaseModel struct {
-	Id    uint      `gorm:"primaryKey;" json:"id"`
-	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
-	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
+	Id    uint       `gorm:"primaryKey;" json:"id"`
+	Ctime *time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
+	Utime *time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
 }
 
 type BaseUidModel struct {
-	Id    string    `gorm:"primaryKey;type:varchar(50);" json:"id"`
-	Ctime time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
-	Utime time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
+	Id    string     `gorm:"primaryKey;type:varchar(50);" json:"id"`
+	Ctime *time.Time `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
+	Utime *time.Time `gorm:"autoUpdateTime;comment:'UpdatedTime'" json:"utime"`
 }
 
 type BaseAssociatedModel struct {
-	Ctime time.Time      `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
-	Dtime gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-" `
+	Ctime *time.Time      `gorm:"autoCreateTime;comment:'CreatedTime'" json:"ctime"`
+	Dtime *gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-" `
 }
 
 type BaseUidModelWithDel struct {
 	BaseUidModel
-	Dtime gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-" `
+	Dtime *gorm.DeletedAt `gorm:"index;comment:'DeletedTime'" json:"-" `
 }
 
 func (m *BaseUidModel) BeforeCreate(tx *gorm.DB) (err error) {
