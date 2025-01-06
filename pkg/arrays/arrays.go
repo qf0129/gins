@@ -26,3 +26,12 @@ func HasAnyItem(arr []any, item any) bool {
 	}
 	return false
 }
+
+func IndexOf(collection []any, el any) int {
+	for i, x := range collection {
+		if x == el {
+			return i
+		}
+	}
+	return -1
+}
